@@ -1,0 +1,89 @@
+<html>
+<head>
+    <meta charset="UTF-8">
+    
+    <!--
+     *
+     * JavaScript / Canvas teaching framwork 
+     * (C)opyright Hartmut Schirmacher, hschirmacher.beuth-hochschule.de 
+     *
+    -->
+
+    <title>CG2 A1: Lines, Curves &amp; Canvas</title>
+    
+    <!-- import main module using RequireJS -->
+    <script data-main="main.js" src="../lib/require.js"></script>
+    
+    <!-- import style sheet -->
+    <link rel="stylesheet" type="text/css" media="screen" href="style.css">
+    
+</head>
+
+<body>
+
+  <!-- this element will be used to diplay errors -->
+  <pre id="error"></pre>
+  
+  <!-- centered region with drawing canvas and parameter area -->
+  <div align="center">
+  
+    <canvas id="drawing_area" width="500" height="400" style="position:relative;">
+        <!-- NOTE: the "position:relative" is required due to the current  
+             implementation of mouse coordinate processing in module "util". -->
+        If you see this text, your browser probably does not 
+        support the HTML5 canvas 2D drawing context. 
+    </canvas>
+    
+    <div id="param_area" >
+
+        <h3>Create Objects:</h3>
+
+        <button id="btnNewLine" type="button"   >New Line</button>
+		<button id="btnNewCircle" type="button"   >New Circle</button>
+		<button id="btnNewParametricCurve" type="button"   >New ParametricCurve</button>
+		<button id="btnNewBezierCurve" type="button"   >New BezierCurve</button>
+        <!-- add more here... -->
+		<h3>Change Values:</h3>
+		<table border="0" width="100%">
+			<tr>
+				<td>Color: </td>
+				<td><input id="ipColor" type="color"></input></td>
+			</tr>
+			<tr>
+				<td>Thickness: </td>
+				<td><input id="ipThickness" class="input" type="number" name="Thickness" autocomplete="off" min="1" max="5"></input></td>
+			</tr>
+			<tr id="Radius">
+				<td>Radius: </td>
+				<td><input id="ipRadius" class="input" type="number"></input></td>
+			</tr>
+			<tr id="x_t">
+				<td>x(t): </td>
+				<td><input id="ipx_t" class="input" type="text" value="100 + 50 * Math.cos(t);"></input></td>
+			</tr>
+			<tr id="y_t">
+				<td>y(t): </td>
+				<td><input id="ipy_t" class="input" type="text" value="150 + 50 * Math.sin(t);"></input></td>
+			</tr>
+			<tr id="t_min">
+				<td>Min t: </td>
+				<td><input id="ipt_min" class="input" type="number"></input></td>
+			</tr>
+			<tr id="t_max">
+				<td>Max t: </td>
+				<td><input id="ipt_max" class="input" type="number"></input></td>
+			</tr>
+			<tr id="Segments">
+				<td>Segments: </td>
+				<td><input id="ipSegments" class="input" type="number"></input></td>
+			</tr>			
+		</table>
+    </div>
+    
+    <div style="float:clear;">
+    </div>
+    
+  </div>
+  
+</body>
+</html>
