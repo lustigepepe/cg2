@@ -48,15 +48,15 @@ define(["vbo"],
                         // current position (u,v) on the surface 
                         var u = uMin + i * (uMax - uMin) / uSegments;
                         var v = vMin + j * (vMax - vMin) / vSegments;
-                        
-                        
-                        
+
+
+
                         // calculate the vertex attributes and push it in the array
-                       var position = posFunc(u,v);
-                       coords.push(position[0],position[1],position[2]);
+                        var position = posFunc(u, v);
+                        coords.push(position[0], position[1], position[2]);
                     }
                 }
-             
+
                 // create vertex buffer object (VBO) for the coordinates
                 this.coordsBuffer = new vbo.Attribute(gl, {"numComponents": 3,
                     "dataType": gl.FLOAT,
