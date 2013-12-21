@@ -34,6 +34,9 @@ define(["gl-matrix", "program", "shaders", "models/band", "models/triangle", "mo
                 this.programs.black = new Program(gl,
                         shaders.getVertexShader("black"),
                         shaders.getFragmentShader("black"));
+                this.programs.blue = new Program(gl,
+                        shaders.getVertexShader("blue"),
+                        shaders.getFragmentShader("blue"));
 
 
 
@@ -72,9 +75,9 @@ define(["gl-matrix", "program", "shaders", "models/band", "models/triangle", "mo
                     "vSegments": 20
                 };
                 //Objects for class Ellipsoid
-              /*  this.ellipsoid = new ParametricSurface(gl, positionFunc, config);
-                this.torusEllipsoid = new ParametricSurface(gl, torusFunc, config);
-                this.hyperboloidEllipsoid = new ParametricSurface(gl, hyperboloidFunc, config);*/
+                /*  this.ellipsoid = new ParametricSurface(gl, positionFunc, config);
+                 this.torusEllipsoid = new ParametricSurface(gl, torusFunc, config);
+                 this.hyperboloidEllipsoid = new ParametricSurface(gl, hyperboloidFunc, config);*/
                 /*              this.ellipsoidWirefire = new ParametricSurface(gl, positionFunc, {asWireframe: true});
                  this.hyperboloidEllipsoidWirefire = new ParametricSurface(gl, hyperboloidFunc, {asWireframe: true});
                  
@@ -190,7 +193,7 @@ define(["gl-matrix", "program", "shaders", "models/band", "models/triangle", "mo
                 if (this.drawOptions["Show HyperboloidSurFace"]) {
                     this.hyperboloidEllipsoid.draw(gl, this.programs.red);
                 }
-                 if (this.drawOptions["Show Robot"]) {
+                if (this.drawOptions["Show Robot"]) {
                     this.hyperboloidEllipsoid.draw(gl, this.programs.red);
                 }
             }
