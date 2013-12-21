@@ -115,7 +115,7 @@ define(["vbo", "jquery", "webgl-debug",
                 var torso = new SceneNode("torso");
                 // skin for the torso: a cube...
                 {
-                    var torsoSkin = new SceneNode("torso skin", [cube], prog_vertexColor);
+                    var torsoSkin = new SceneNode("torso skin", [cube], "vertexColor");
                     mat4.translate(torsoSkin.transformation, torsoTranslate);
                     mat4.scale(torsoSkin.transformation, torsoSize);
                     mat4.rotate(torsoSkin.transformation, eval(torsoRotation.degree), eval(torsoRotation.axis));
@@ -128,20 +128,20 @@ define(["vbo", "jquery", "webgl-debug",
                     var headNeck = new SceneNode("Head skeleton");
                     mat4.translate(headNeck.transformation, headSkeletonTrans);
                     {
-                        var faceSkin = new SceneNode("Face skin", [cube], prog_vertexColor);
+                        var faceSkin = new SceneNode("Face skin", [cube], "vertexColor");
                         mat4.translate(faceSkin.transformation, faceTranslate);
                         mat4.scale(faceSkin.transformation, faceSize);
                         mat4.rotate(faceSkin.transformation, eval(faceRotation.degree), eval(faceRotation.axis));
-                        var LEyeSkin = new SceneNode("left eye skin", [triangle], prog_vertexColor);
+                        var LEyeSkin = new SceneNode("left eye skin", [triangle], "vertexColor");
                         mat4.translate(LEyeSkin.transformation, [-0.06, 0.22, 0.16]);
                         mat4.scale(LEyeSkin.transformation, [0.05, 0.05, 0.05]);
-                        var REyeSkin = new SceneNode("left eye skin", [triangle], prog_vertexColor);
+                        var REyeSkin = new SceneNode("left eye skin", [triangle], "vertexColor");
                         mat4.translate(REyeSkin.transformation, [0.06, 0.22, 0.16]);
                         mat4.scale(REyeSkin.transformation, [0.05, 0.05, 0.05]);
-                        var mouthSkin = new SceneNode("mouth skin", [band], prog_blue);
+                        var mouthSkin = new SceneNode("mouth skin", [band], "blue");
                         mat4.translate(mouthSkin.transformation, [0.0, 0.1, 0.15]);
                         mat4.scale(mouthSkin.transformation, [0.1, 0.05, 0.1]);
-                        var neckSkin = new SceneNode("Neck skin", [band], prog_red);
+                        var neckSkin = new SceneNode("Neck skin", [band], "red2");
                         mat4.scale(neckSkin.transformation, neckSize);
                         headNeck.addObjects([REyeSkin]);
                         headNeck.addObjects([LEyeSkin]);
@@ -166,10 +166,10 @@ define(["vbo", "jquery", "webgl-debug",
                         //mat4.translate(leftUpperarm.transformation, [0,0,0]);
 
                         {
-                            var LShoulderJointSkin = new SceneNode("left shoulder joint skin", [band], prog_blue);
+                            var LShoulderJointSkin = new SceneNode("left shoulder joint skin", [band], "blue");
                             mat4.scale(LShoulderJointSkin.transformation, leftArmSize[0]);
                             mat4.rotate(LShoulderJointSkin.transformation, eval(leftArmRotate[0].degree), eval(leftArmRotate[0].axis));
-                            var LUpperarmSkin = new SceneNode("left upperarm skin", [cube], prog_vertexColor);
+                            var LUpperarmSkin = new SceneNode("left upperarm skin", [cube], vertexColor);
                             mat4.translate(LUpperarmSkin.transformation, leftArmTranslate[1]);
                             mat4.scale(LUpperarmSkin.transformation, leftArmSize[1]);
                             mat4.rotate(LUpperarmSkin.transformation, eval(leftArmRotate[1].degree), eval(leftArmRotate[1].axis));
@@ -185,10 +185,10 @@ define(["vbo", "jquery", "webgl-debug",
                         var leftForearm = new SceneNode("left ellbow skeleton");
                         mat4.translate(leftForearm.transformation, leftArmTranslate[2]);
                         {
-                            var LEllbowSkin = new SceneNode("left ellbow joint skin", [band], prog_blue);
+                            var LEllbowSkin = new SceneNode("left ellbow joint skin", [band], "blue");
                             mat4.scale(LEllbowSkin.transformation, leftArmSize[2]);
                             mat4.rotate(LEllbowSkin.transformation, eval(leftArmRotate[2].degree), eval(leftArmRotate[2].axis));
-                            var LForearmSkin = new SceneNode("left forearm skin", [cube], prog_vertexColor);
+                            var LForearmSkin = new SceneNode("left forearm skin", [cube], vertexColor);
                             mat4.translate(LForearmSkin.transformation, leftArmTranslate[3]);
                             mat4.scale(LForearmSkin.transformation, leftArmSize[3]);
                             mat4.rotate(LForearmSkin.transformation, eval(leftArmRotate[3].degree), eval(leftArmRotate[3].axis));
@@ -201,10 +201,10 @@ define(["vbo", "jquery", "webgl-debug",
                             var leftHand = new SceneNode("Left hand skeleton");
                             mat4.translate(leftHand.transformation, leftHandTranslate);
                             {
-                                var LWristSkin = new SceneNode("Left wrist skin", [band], prog_red);
+                                var LWristSkin = new SceneNode("Left wrist skin", [band], "red2");
                                 mat4.scale(LWristSkin.transformation, leftArmSize[4]);
                                 mat4.rotate(LWristSkin.transformation, eval(leftArmRotate[4].degree), eval(leftArmRotate[4].axis));
-                                var LHandSkin = new SceneNode("Left hand skin", [triangle], prog_vertexColor);
+                                var LHandSkin = new SceneNode("Left hand skin", [triangle], vertexColor);
                                 mat4.translate(LHandSkin.transformation, leftArmTranslate[5]);
                                 mat4.scale(LHandSkin.transformation, leftArmSize[5]);
                                 leftHand.addObjects([LWristSkin]);
@@ -230,10 +230,10 @@ define(["vbo", "jquery", "webgl-debug",
                     {
                         var rightUpperarm = new SceneNode("right upperarm skeleton");
                         {
-                            var RShoulderJointSkin = new SceneNode("right shoulder joint skin", [band], prog_blue);
+                            var RShoulderJointSkin = new SceneNode("right shoulder joint skin", [band], "blue");
                             mat4.scale(RShoulderJointSkin.transformation, rightArmSize[0]);
                             mat4.rotate(RShoulderJointSkin.transformation, eval(rightArmRotate[0].degree), eval(rightArmRotate[0].axis));
-                            var RUpperarmSkin = new SceneNode("right upperarm skin", [cube], prog_vertexColor);
+                            var RUpperarmSkin = new SceneNode("right upperarm skin", [cube], vertexColor);
                             mat4.translate(RUpperarmSkin.transformation, rightArmTranslate[1]);
                             mat4.scale(RUpperarmSkin.transformation, rightArmSize[1]);
                             mat4.rotate(RUpperarmSkin.transformation, eval(rightArmRotate[1].degree), eval(rightArmRotate[1].axis));
@@ -249,10 +249,10 @@ define(["vbo", "jquery", "webgl-debug",
                         var rightForearm = new SceneNode("right ellbow skeleton");
                         mat4.translate(rightForearm.transformation, rightArmTranslate[2]);
                         {
-                            var REllbowSkin = new SceneNode("right ellbow joint skin", [band], prog_blue);
+                            var REllbowSkin = new SceneNode("right ellbow joint skin", [band], "blue");
                             mat4.scale(REllbowSkin.transformation, rightArmSize[2]);
                             mat4.rotate(REllbowSkin.transformation, eval(rightArmRotate[2].degree), eval(rightArmRotate[2].axis));
-                            var RForearmSkin = new SceneNode("right forearm skin", [cube], prog_vertexColor);
+                            var RForearmSkin = new SceneNode("right forearm skin", [cube], vertexColor);
                             mat4.translate(RForearmSkin.transformation, rightArmTranslate[3]);
                             mat4.scale(RForearmSkin.transformation, rightArmSize[3]);
                             mat4.rotate(RForearmSkin.transformation, eval(rightArmRotate[3].degree), eval(rightArmRotate[3].axis));
@@ -265,10 +265,10 @@ define(["vbo", "jquery", "webgl-debug",
                             var rightHand = new SceneNode("right hand skeleton");
                             mat4.translate(rightHand.transformation, rightHandTranslate);
                             {
-                                var RWristSkin = new SceneNode("right wrist skin", [band], prog_red);
+                                var RWristSkin = new SceneNode("right wrist skin", [band], "red2");
                                 mat4.scale(RWristSkin.transformation, rightArmSize[4]);
                                 mat4.rotate(RWristSkin.transformation, eval(rightArmRotate[4].degree), eval(rightArmRotate[4].axis));
-                                var RHandSkin = new SceneNode("right hand skin", [triangle], prog_vertexColor);
+                                var RHandSkin = new SceneNode("right hand skin", [triangle], vertexColor);
                                 mat4.translate(RHandSkin.transformation, rightArmTranslate[5]);
                                 mat4.scale(RHandSkin.transformation, rightArmSize[5]);
                                 rightHand.addObjects([RWristSkin]);
@@ -290,7 +290,7 @@ define(["vbo", "jquery", "webgl-debug",
                 //mat4.rotate(robot1.transformation, Math.PI/3, [0, 1, 0]);
 
                 // the world - this node is needed in the draw() method below!
-                this.world = new SceneNode("world", [robot1], prog_red);
+                this.world = new SceneNode("world", [robot1],"red2");
                 // for the UI - this will be accessed directly by HtmlController
                 this.drawOptions = {"Perspective": true};
                 /*
@@ -381,7 +381,7 @@ define(["vbo", "jquery", "webgl-debug",
                         gl.enable(gl.DEPTH_TEST);
                 gl.depthFunc(gl.LESS);
                 // start drawing at the world's root node
-                this.world.draw(gl, this.prog_vertexColor, modelView);
+                this.world.draw(gl, this.vertexColor, modelView);
             }; // MyRobotScene draw()
 
             // create scene and start drawing
