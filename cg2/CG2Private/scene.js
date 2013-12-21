@@ -7,35 +7,44 @@
 
 
 /* requireJS module definition */
-define(["gl-matrix", "program", "shaders", "models/band", "models/triangle", "models/cube",
+define(["gl-matrix", "program", "shaders", "models/band", "models/triangle", "models/cube", /*"models/robot",*/
     "models/parametric"],
-        (function(glmatrix, Program, shaders, Band, Triangle, Cube, ParametricSurface) {
+        (function(glmatrix, Program, shaders, Band, Triangle, Cube, /* Robot,*/ ParametricSurface) {
 
             "use strict";
+
             // simple scene: create some scene objects in the constructor, and
             // draw them in the draw() method
             var Scene = function(gl) {
 
                 // store the WebGL rendering context 
                 this.gl = gl;
+
                 // create all required GPU programs from vertex and fragment shaders
                 this.programs = {};
                 this.programs.red = new Program(gl,
                         shaders.getVertexShader("red"),
                         shaders.getFragmentShader("red"));
+                this.programs.red2 = new Program(gl,
+                        shaders.getVertexShader("red2"),
+                        shaders.getFragmentShader("red2"));
                 this.programs.vertexColor = new Program(gl,
                         shaders.getVertexShader("vertex_color"),
                         shaders.getFragmentShader("vertex_color"));
-                // create some objects to be drawn in this scene
-                this.triangle = new Triangle(gl);
-                this.cube = new Cube(gl);
-                this.band = new Band(gl, {height: 0.4, drawStyle: "points"});
+                this.programs.black = new Program(gl,
+                        shaders.getVertexShader("black"),
+                        shaders.getFragmentShader("black"));
+
+
+
+
                 // create a parametric surface to be drawn in this scene
                 var positionFunc = function(u, v) {
                     return [0.5 * Math.sin(u) * Math.cos(v),
                         0.3 * Math.sin(u) * Math.sin(v),
-                        0.5 * Math.cos(u)];
+                        0.9 * Math.cos(u)];
                 };
+
                 // R is the radius from the torus center
                 var R = 0.8;
                 // r is the radius from the torus 
@@ -45,12 +54,15 @@ define(["gl-matrix", "program", "shaders", "models/band", "models/triangle", "mo
                         (r * Math.cos(u) + R) * Math.sin(v),
                         r * Math.sin(u)];
                 };
+
+
+
+
                 var hyperboloidFunc = function(u, v) {
                     return [Math.sqrt(Math.pow((u), 2) + 1) * Math.cos(v),
                         Math.sqrt(Math.pow((u), 2) + 1) * Math.sin(v),
                         (u)];
                 };
-          
                 var config = {
                     "uMin": -Math.PI,
                     "uMax": Math.PI,
@@ -59,36 +71,63 @@ define(["gl-matrix", "program", "shaders", "models/band", "models/triangle", "mo
                     "uSegments": 40,
                     "vSegments": 20
                 };
-                this.ellipsoid = new ParametricSurface(gl, positionFunc, config);
+                //Objects for class Ellipsoid
+              /*  this.ellipsoid = new ParametricSurface(gl, positionFunc, config);
                 this.torusEllipsoid = new ParametricSurface(gl, torusFunc, config);
-                this.hyperboloidEllipsoid = new ParametricSurface(gl, hyperboloidFunc, config);
+                this.hyperboloidEllipsoid = new ParametricSurface(gl, hyperboloidFunc, config);*/
+                /*              this.ellipsoidWirefire = new ParametricSurface(gl, positionFunc, {asWireframe: true});
+                 this.hyperboloidEllipsoidWirefire = new ParametricSurface(gl, hyperboloidFunc, {asWireframe: true});
+                 
+                 this.ellipsoidFilled = new ParametricSurface(gl, positionFunc, {filled: true});
+                 this.hyperboloidEllipsoidFilled = new ParametricSurface(gl, hyperboloidFunc, {filled: true});
+                 
+                 
+                 */
+                // create some objects to be drawn in this scene
+                this.triangle = new Triangle(gl);
+                this.cube = new Cube(gl);
+                this.band = new Band(gl, {height: 0.4, drawStyle: "points"});
+                this.bandWireframe = new Band(gl, {height: 0.4, asWireframe: true});
+                this.bandFilled = new Band(gl, {height: 0.4, filled: true});
+
                 // initial position of the camera
                 this.cameraTransformation = mat4.lookAt([0, 0.5, 3], [0, 0, 0], [0, 1, 0]);
+
                 // transformation of the scene, to be changed by animation
                 this.transformation = mat4.create(this.cameraTransformation);
+
                 // the scene has an attribute "drawOptions" that is used by 
                 // the HtmlController. Each attribute in this.drawOptions 
                 // automatically generates a corresponding checkbox in the UI.
                 this.drawOptions = {"Perspective Projection": false,
                     "Show Triangle": false,
                     "Show Cube": false,
-                    "Show Band": false,
+                    "Show Band": true,
+                    "Solid Band": false,
+                    "Wireframe Band": false,
                     "Show Ellipsoid": false,
+                    "Solid Ellipsoid": false,
+                    "Wire Ellipsoid": false,
                     "Show TorusSurface": false,
-                     "Show HyperboloidSurFace": true
-                     }
+                    "Show HyperboloidSurFace": false,
+                    "Show Robot": false
+                }
                 ;
             };
+
             // the scene's draw method draws whatever the scene wants to draw
             Scene.prototype.draw = function() {
 
                 // just a shortcut
                 var gl = this.gl;
+
                 // set up the projection matrix, depending on the canvas size
                 var aspectRatio = gl.drawingBufferWidth / gl.drawingBufferHeight;
                 var projection = this.drawOptions["Perspective Projection"] ?
                         mat4.perspective(45, aspectRatio, 0.01, 100) :
                         mat4.ortho(-aspectRatio, aspectRatio, -1, 1, 0.01, 100);
+
+
                 // set the uniform variables for all used programs
                 for (var p in this.programs) {
                     this.programs[p].use();
@@ -102,26 +141,61 @@ define(["gl-matrix", "program", "shaders", "models/band", "models/triangle", "mo
                 // set up depth test to discard occluded fragments
                 gl.enable(gl.DEPTH_TEST);
                 gl.depthFunc(gl.LESS);
+
+                // Z-Fighting
+                gl.enable(gl.POLYGON_OFFSET_FILL);
+                gl.polygonOffset(1.0, 1.0);
+
+
+
                 // draw the scene objects
                 if (this.drawOptions["Show Triangle"]) {
-                    this.triangle.draw(gl, this.programs.red);
+                    this.triangle.draw(gl, this.programs.vertexColor);
                 }
+                ;
                 if (this.drawOptions["Show Cube"]) {
-                    this.cube.draw(gl, this.programs.red);
+                    this.cube.draw(gl, this.programs.vertexColor);
                 }
+                ;
                 if (this.drawOptions["Show Band"]) {
                     this.band.draw(gl, this.programs.red);
                 }
+                ;
+                if (this.drawOptions["Solid Band"]) {
+                    this.bandFilled.draw(gl, this.programs.red2);
+                }
+                ;
+                if (this.drawOptions["Wireframe Band"]) {
+                    this.bandWireframe.draw(gl, this.programs.black);
+                }
+                ;
+
+                if (this.drawOptions["Show Ellipsoid"]) {
+                    this.ellipsoid.draw(gl, this.programs.red);
+                }
+                ;/*
+                 if (this.drawOptions["Solid Ellipsoid"]) {
+                 this.ellipsoidWirefire.draw(gl, this.programs.black);
+                 }
+                 if (this.drawOptions["Wire Ellipsoid"]) {
+                 this.ellipsoidFilled.draw(gl, this.programs.red);
+                 }*/
+
                 if (this.drawOptions["Show Ellipsoid"]) {
                     this.ellipsoid.draw(gl, this.programs.red);
                 }
                 if (this.drawOptions["Show TorusSurface"]) {
                     this.torusEllipsoid.draw(gl, this.programs.red);
                 }
-                 if (this.drawOptions["Show HyperboloidSurFace"]) {
-                 this.hyperboloidEllipsoid.draw(gl, this.programs.red);
-                 }
-            };
+                if (this.drawOptions["Show HyperboloidSurFace"]) {
+                    this.hyperboloidEllipsoid.draw(gl, this.programs.red);
+                }
+                 if (this.drawOptions["Show Robot"]) {
+                    this.hyperboloidEllipsoid.draw(gl, this.programs.red);
+                }
+            }
+            ;
+
             // the scene's rotate method is called from HtmlController, when certain
             // keyboard keys are pressed. Try Y and Shift-Y, for example.
             Scene.prototype.rotate = function(rotationAxis, angle) {
@@ -130,6 +204,7 @@ define(["gl-matrix", "program", "shaders", "models/band", "models/triangle", "mo
 
                 // degrees to radians
                 angle = angle * Math.PI / 180;
+
                 // manipulate the corresponding matrix, depending on the name of the joint
                 switch (rotationAxis) {
                     case "worldY":
@@ -143,11 +218,13 @@ define(["gl-matrix", "program", "shaders", "models/band", "models/triangle", "mo
                         break;
                 }
                 ;
+
                 // redraw the scene
                 this.draw();
-            }
+            };
 
             return Scene;
+
         })); // define module
 
 

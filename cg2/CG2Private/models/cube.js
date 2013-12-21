@@ -37,82 +37,127 @@
 
 
 /* requireJS module definition */
-define(["vbo"], 
-       (function(vbo) {
-       
-    "use strict";
-    
-    // constructor, takes WebGL context object as argument
-    var Cube = function(gl) {
-    
-        
-        window.console.log("Creating a unit Cube."); 
-    
-        // generate points and store in an array
-        var coords = [ 
-                       // front
-                       -0.5, -0.5,  0.5,  // A: index 0
-                        0.5, -0.5,  0.5,  // B: index 1
-                        0.5,  0.5,  0.5,  // C: index 2
-                       -0.5,  0.5,  0.5,  // D: index 3
-                       
-                       // back
-                       -0.5, -0.5, -0.5,  // E: index 4
-                        0.5, -0.5, -0.5,  // F: index 5
-                        0.5,  0.5, -0.5,  // G: index 6
-                       -0.5,  0.5, -0.5,  // H: index 7
-                       
-                       // left
-                       -0.5, -0.5,  0.5,  // A': index 8
-                       -0.5,  0.5,  0.5,  // D': index 9
-                       -0.5,  0.5, -0.5,  // H': index 10
-                       -0.5, -0.5, -0.5,  // E': index 11
-                       
-                       // right
-                        0.5, -0.5,  0.5,  // B': index 12
-                        0.5, -0.5, -0.5,  // F': index 13
-                        0.5,  0.5, -0.5,  // G': index 14
-                        0.5,  0.5,  0.5,  // C': index 15
-                       
-                       // top
-                       -0.5,  0.5,  0.5,  // D'': index 16
-                        0.5,  0.5,  0.5,  // C'': index 17
-                        0.5,  0.5, -0.5,  // G'': index 18
-                       -0.5,  0.5, -0.5,  // H'': index 19
+define(["vbo"],
+        (function(vbo) {
 
-                       // bottom
-                       -0.5, -0.5,  0.5,  // A'': index 20
-                       -0.5, -0.5, -0.5,  // E'': index 21
-                        0.5, -0.5, -0.5,  // F'': index 22
-                        0.5, -0.5,  0.5   // B'': index 23
-                     ];
-                                          
-        // therer are 3 floats per vertex, so...
-        this.numVertices = coords.length / 3;
-        
-        // create vertex buffer object (VBO) for the coordinates
-        this.coordsBuffer = new vbo.Attribute(gl, { "numComponents": 3,
-                                                    "dataType": gl.FLOAT,
-                                                    "data": coords 
-                                                  } );
+            "use strict";
 
-        
-    };
+            // constructor, takes WebGL context object as argument
+            var Cube = function(gl) {
 
-    // draw method: activate buffers and issue WebGL draw() method
-    Cube.prototype.draw = function(gl,program) {
-    
-        // bind the attribute buffers
-        this.coordsBuffer.bind(gl, program, "vertexPosition");
-                
-        // draw the vertices as points
-        gl.drawArrays(gl.POINTS, 0, this.coordsBuffer.numVertices()); 
-         
-    };
-        
-    // this module only returns the constructor function    
-    return Cube;
 
-})); // define
+                window.console.log("Creating a unit Cube.");
 
-    
+                // generate points and store in an array
+                var coords = [
+                    // front
+                    -0.5, -0.5, 0.5, // A: index 0
+                    0.5, -0.5, 0.5, // B: index 1
+                    0.5, 0.5, 0.5, // C: index 2
+                    -0.5, 0.5, 0.5, // D: index 3
+
+                    // back
+                    -0.5, -0.5, -0.5, // E: index 4
+                    0.5, -0.5, -0.5, // F: index 5
+                    0.5, 0.5, -0.5, // G: index 6
+                    -0.5, 0.5, -0.5, // H: index 7
+
+                    // left
+                    -0.5, -0.5, 0.5, // A': index 8
+                    -0.5, 0.5, 0.5, // D': index 9
+                    -0.5, 0.5, -0.5, // H': index 10
+                    -0.5, -0.5, -0.5, // E': index 11
+
+                    // right
+                    0.5, -0.5, 0.5, // B': index 12
+                    0.5, -0.5, -0.5, // F': index 13
+                    0.5, 0.5, -0.5, // G': index 14
+                    0.5, 0.5, 0.5, // C': index 15
+
+                    // top
+                    -0.5, 0.5, 0.5, // D'': index 16
+                    0.5, 0.5, 0.5, // C'': index 17
+                    0.5, 0.5, -0.5, // G'': index 18
+                    -0.5, 0.5, -0.5, // H'': index 19
+
+                    // bottom
+                    -0.5, -0.5, 0.5, // A'': index 20
+                    -0.5, -0.5, -0.5, // E'': index 21
+                    0.5, -0.5, -0.5, // F'': index 22
+                    0.5, -0.5, 0.5   // B'': index 23
+                ];
+
+                var cIndex = [0, 1, 2, // front face
+                    0, 2, 3,
+                    4, 5, 6, // back face
+                    4, 6, 7,
+                    8, 9, 10, // left face
+                    8, 10, 11,
+                    12, 13, 14, // right face
+                    12, 14, 15,
+                    16, 17, 18, // top face
+                    16, 18, 19,
+                    20, 21, 22, // bottom face
+                    20, 22, 23,
+                ];
+
+                var colors = [0, 1.0, 1.0, 1.0, // front face
+                    0, 1.0, 1.0, 1.0,
+                    0, 1.0, 1.0, 1.0,
+                    0, 1.0, 1.0, 1.0,
+                    0, 0, 1.0, 1.0, // back face
+                    0, 0, 1.0, 1.0,
+                    0, 0, 1.0, 1.0,
+                    0, 0, 1.0, 1.0,
+                    1.0, 0, 0, 1.0, // left face
+                    1.0, 0, 0, 1.0,
+                    1.0, 0, 0, 1.0,
+                    1.0, 0, 0, 1.0,
+                    1.0, 0, 1.0, 1.0, // right face
+                    1.0, 0, 1.0, 1.0,
+                    1.0, 0, 1.0, 1.0,
+                    1.0, 0, 1.0, 1.0,
+                    0, 1.0, 0, 1.0, // top face
+                    0, 1.0, 0, 1.0,
+                    0, 1.0, 0, 1.0,
+                    0, 1.0, 0, 1.0,
+                    1.0, 1.0, 0, 1.0, // bottom face
+                    1.0, 1.0, 0, 1.0,
+                    1.0, 1.0, 0, 1.0,
+                    1.0, 1.0, 0, 1.0,
+                ];
+
+                // therer are 3 floats per vertex, so...
+                this.numVertices = coords.length / 3;
+
+                // create vertex buffer object (VBO) for the coordinates
+                this.coordsBuffer = new vbo.Attribute(gl, {"numComponents": 3,
+                    "dataType": gl.FLOAT,
+                    "data": coords
+                });
+                this.colorsBuffer = new vbo.Attribute(gl, {"numComponents": 4,
+                    "dataType": gl.FLOAT,
+                    "data": colors
+                });
+                this.cIndexBuffer = new vbo.Indices(gl, {"indices": cIndex});
+
+            };
+
+            // draw method: activate buffers and issue WebGL draw() method
+            Cube.prototype.draw = function(gl, program) {
+
+                // bind the attribute buffers
+                this.coordsBuffer.bind(gl, program, "vertexPosition");
+                this.colorsBuffer.bind(gl, program, "vertexColor");
+                this.cIndexBuffer.bind(gl);
+                // draw the vertices as points
+                gl.drawElements(gl.TRIANGLES, this.cIndexBuffer.numIndices(), gl.UNSIGNED_SHORT, 0);
+
+            };
+
+            // this module only returns the constructor function    
+            return Cube;
+
+        })); // define
+
+
