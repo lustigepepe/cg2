@@ -15,7 +15,8 @@ define(["text!shaders/vertex_color.vs", "text!shaders/vertex_color.fs",
     "text!shaders/unicolor.vs", "text!shaders/unicolor.fs",
     "text!shaders/red.vs", "text!shaders/red.fs",
     "text!shaders/red2.vs", "text!shaders/red2.fs",
-    "text!shaders/black.vs", "text!shaders/black.fs"
+    "text!shaders/black.vs", "text!shaders/black.fs",
+    "text!shaders/blue.vs", "text!shaders/blue.fs"
 
 
 ],
@@ -23,8 +24,10 @@ define(["text!shaders/vertex_color.vs", "text!shaders/vertex_color.fs",
                 vs_unicolor, fs_unicolor,
                 vs_red, fs_red,
                 vs_red2, fs_red2,
-                vs_black, fs_black
-                ) {
+                vs_black, fs_black,
+                vs_blue, fs_blue
+               
+ ) {
 
             "use strict";
 
@@ -36,6 +39,7 @@ define(["text!shaders/vertex_color.vs", "text!shaders/vertex_color.fs",
             shaders["red2"] = {vertex: vs_red2, fragment: fs_red2};
 
             shaders["black"] = {vertex: vs_black, fragment: fs_black};
+            shaders["blue"] = {vertex: vs_blue, fragment: fs_blue};
 
             var mod = {};
 

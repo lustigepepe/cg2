@@ -290,7 +290,7 @@ define(["vbo", "jquery", "webgl-debug",
                 //mat4.rotate(robot1.transformation, Math.PI/3, [0, 1, 0]);
 
                 // the world - this node is needed in the draw() method below!
-                this.world = new SceneNode("world", [robot1],"red2");
+                this.world = new SceneNode("world", [robot1], "red2");
                 // for the UI - this will be accessed directly by HtmlController
                 this.drawOptions = {"Perspective": true};
                 /*
@@ -353,40 +353,16 @@ define(["vbo", "jquery", "webgl-debug",
                 }; // rotateJoint()
 
             }; // MyRobotScene constructor
-
-            // the scene's draw method draws whatever the scene wants to draw
-            Robot.prototype.draw = function() {
-
-                // get aspect ratio of canvas
-                var c = $("#drawing_area").get(0);
-                var aspectRatio = c.width / c.height;
-                // set camera's projection matrix in all programs
-                var projection = this.drawOptions["Perspective"] ?
-                        mat4.perspective(45, aspectRatio, 0.01, 100) :
-                        mat4.ortho(-aspectRatio, aspectRatio, -1, 1, 0.01, 100);
-                for (var i = 0; i < this.programs.length; i++) {
-                    var p = this.programs[i];
-                    p.use();
-                    p.setUniform("projectionMatrix", "mat4", projection);
-                }
-                ;
+            Robot.prototype.draw = function(gl) {
+              
                 // initial camera / initial model-view matrix
                 var modelView = mat4.lookAt([0, 0.5, 3], [0, 0, 0], [0, 1, 0]);
-                // shortcut
-                var gl = this.gl;
-                // clear color and depth buffers
-                gl.clearColor(0.7, 0.7, 0.7, 1.0);
-                        gl.clear(gl.COLOR_BUFFER_BIT |  gl.DEPTH_BUFFER_BIT);
-                        // enable depth testing, keep fragments with smaller depth values
-                        gl.enable(gl.DEPTH_TEST);
-                gl.depthFunc(gl.LESS);
-                // start drawing at the world's root node
-                this.world.draw(gl, this.vertexColor, modelView);
-            }; // MyRobotScene draw()
 
-            // create scene and start drawing
+                // start drawing at the world's root node
+                this.world.draw(gl, this.prog_vertexColor, modelView);
+
+            };
             var scene = new Robot(gl);
-            scene.draw();
             // head animation
             var headRight = true;
             var headLeft = false;

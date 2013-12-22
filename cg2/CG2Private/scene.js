@@ -7,9 +7,9 @@
 
 
 /* requireJS module definition */
-define(["gl-matrix", "program", "shaders", "models/band", "models/triangle", "models/cube", /*"models/robot",*/
+define(["gl-matrix", "program", "shaders", "models/band", "models/triangle", "models/cube", "models/robot",
     "models/parametric"],
-        (function(glmatrix, Program, shaders, Band, Triangle, Cube, /* Robot,*/ ParametricSurface) {
+        (function(glmatrix, Program, shaders, Band, Triangle, Cube, Robot, ParametricSurface) {
 
             "use strict";
 
@@ -92,6 +92,8 @@ define(["gl-matrix", "program", "shaders", "models/band", "models/triangle", "mo
                 this.band = new Band(gl, {height: 0.4, drawStyle: "points"});
                 this.bandWireframe = new Band(gl, {height: 0.4, asWireframe: true});
                 this.bandFilled = new Band(gl, {height: 0.4, filled: true});
+               // this.robot = new Robot(gl);
+
 
                 // initial position of the camera
                 this.cameraTransformation = mat4.lookAt([0, 0.5, 3], [0, 0, 0], [0, 1, 0]);
@@ -137,6 +139,7 @@ define(["gl-matrix", "program", "shaders", "models/band", "models/triangle", "mo
                     this.programs[p].setUniform("projectionMatrix", "mat4", projection);
                     this.programs[p].setUniform("modelViewMatrix", "mat4", this.transformation);
                 }
+                var modelView = mat4.lookAt([0, 0.5, 3], [0, 0, 0], [0, 1, 0]);
 
                 // clear color and depth buffers
                 gl.clearColor(0.7, 0.7, 0.7, 1.0);
@@ -194,7 +197,7 @@ define(["gl-matrix", "program", "shaders", "models/band", "models/triangle", "mo
                     this.hyperboloidEllipsoid.draw(gl, this.programs.red);
                 }
                 if (this.drawOptions["Show Robot"]) {
-                    this.hyperboloidEllipsoid.draw(gl, this.programs.red);
+                    this.hyperboloidEllipsoid.draw(gl, this.programs.vertexColor);
                 }
             }
             ;
