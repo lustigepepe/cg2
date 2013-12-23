@@ -13,7 +13,7 @@ define(["scene_node", "models/cube"],
              *  purposes, using webgl-debug.js
              *
              */
-            var Robot = function(gl, programs) {
+            var RobotTest = function(gl, programs) {
                 var cube = new Cube(gl);
                 var headSize = [0.3, 0.35, 0.3];
                 var torsoSize = [0.6, 1.0, 0.4];
@@ -37,11 +37,11 @@ define(["scene_node", "models/cube"],
 
 
             };
-            Robot.prototype.draw = function(gl, program, transformation) {
+            RobotTest.prototype.draw = function(gl, program, transformation) {
 
                 this.torso.draw(gl, program, transformation);
             };
 
-            return Robot;
+            return RobotTest;
 
         }));

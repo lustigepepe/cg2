@@ -7,9 +7,9 @@
 
 
 /* requireJS module definition */
-define(["gl-matrix", "program", "shaders", "models/band", "models/triangle", "models/cube"/*, "models/robot"*/,"models/robot_Test",
+define(["gl-matrix", "program", "shaders", "models/band", "models/triangle", "models/cube", "models/robot", "models/robot_Test",
     "models/parametric"],
-        (function(glmatrix, Program, shaders, Band, Triangle, Cube/*, Robot*/,RobotTest, ParametricSurface) {
+        (function(glmatrix, Program, shaders, Band, Triangle, Cube, Robot, RobotTest, ParametricSurface) {
 
             "use strict";
 
@@ -92,8 +92,8 @@ define(["gl-matrix", "program", "shaders", "models/band", "models/triangle", "mo
                 this.band = new Band(gl, {height: 0.4, drawStyle: "points"});
                 this.bandWireframe = new Band(gl, {height: 0.4, asWireframe: true});
                 this.bandFilled = new Band(gl, {height: 0.4, filled: true});
-              //  this.robot = new Robot(gl,this.programs);
-                this.robotTest = new RobotTest(gl,this.programs);
+                this.robot = new Robot(gl, this.programs);
+                this.robotTest = new RobotTest(gl, this.programs);
 
 
                 // initial position of the camera
@@ -108,7 +108,7 @@ define(["gl-matrix", "program", "shaders", "models/band", "models/triangle", "mo
                 this.drawOptions = {"Perspective Projection": false,
                     "Show Triangle": false,
                     "Show Cube": false,
-                    "Show Band": false,
+                    "Show Band": true,
                     "Solid Band": false,
                     "Wireframe Band": false,
                     "Show Ellipsoid": false,
@@ -117,8 +117,8 @@ define(["gl-matrix", "program", "shaders", "models/band", "models/triangle", "mo
                     "Show TorusSurface": false,
                     "Show HyperboloidSurFace": false,
                     "Show Robot": false,
-                    "Show RobotTest": true
-                    
+                    "Show RobotTest": false
+
                 }
                 ;
             };
@@ -201,7 +201,7 @@ define(["gl-matrix", "program", "shaders", "models/band", "models/triangle", "mo
                 if (this.drawOptions["Show Robot"]) {
                     this.robot.draw(gl, this.program, this.transformation);
                 }
-                  if (this.drawOptions["Show RobotTest"]) {
+                if (this.drawOptions["Show RobotTest"]) {
                     this.robotTest.draw(gl, this.program, this.transformation);
                 }
             }
@@ -211,9 +211,9 @@ define(["gl-matrix", "program", "shaders", "models/band", "models/triangle", "mo
             // keyboard keys are pressed. Try Y and Shift-Y, for example.
             Scene.prototype.rotate = function(rotationAxis, angle) {
 
-                // window.console.log("rotating around " + rotationAxis + " by " + angle + " degrees." );
+                window.console.log("rotating around " + rotationAxis + " by " + angle + " degrees.");
 
-                // degrees to radians
+                // degrees to radian
                 angle = angle * Math.PI / 180;
 
                 // manipulate the corresponding matrix, depending on the name of the joint
@@ -224,11 +224,41 @@ define(["gl-matrix", "program", "shaders", "models/band", "models/triangle", "mo
                     case "worldX":
                         mat4.rotate(this.transformation, angle, [1, 0, 0]);
                         break;
+                    case "headY":
+                        mat4.rotate(this.transformation, angle, [0, 1, 0]); // h-key headNeck-rotation
+                        break;
+                    case "leftArm":
+                        mat4.rotate(this.transformation, -angle, [1, 0, 0]); // q-key leftArm-rotation
+                        break;
+                    case "rightArm":
+                        mat4.rotate(this.transformation, -angle, [1, 0, 0]); // w-key rightArm-rotation
+                        break;
+                    case "leftForearm":
+                        mat4.rotate(this.transformation, -angle, [1, 0, 0]); // e-key leftForearm-rotation
+                        break;
+                    case "rightForearm":
+                        mat4.rotate(this.transformation, -angle, [1, 0, 0]); // r-key rightForearm-rotation
+                        break;
+
+                    case "leftHand":
+                        mat4.rotate(this.transformation, angle, [0, 0, 1]);
+                        break;
+                    case "rightHand":
+                        mat4.rotate(this.transformation, -angle, [0, 0, 1]);
+                        break;
+                    case "leftHandX":
+                        mat4.rotate(this.transformation, angle, [0, 1, 0]); // v-key LHandSkin-rotation
+                        break;
+                    case "rightHandX":
+                        mat4.rotate(this.transformation, -angle, [0, 1, 0]); // b-key RHandSkin-rotation
+                        break;
                     default:
                         window.console.log("axis " + rotationAxis + " not implemented.");
                         break;
                 }
                 ;
+
+
 
                 // redraw the scene
                 this.draw();
