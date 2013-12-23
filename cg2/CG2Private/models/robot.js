@@ -1,24 +1,37 @@
-/*
- * WebGL core teaching framwork 
- * (C)opyright Hartmut Schirmacher, hschirmacher.beuth-hochschule.de 
- *
- * Module: ParametricSurface
- *
- * This function creates an object to draw any parametric surface.
- *
- */
-
-
 /* requireJS module definition */
-define(["vbo", "jquery", "webgl-debug",
+define(["jquery", "gl-matrix", "webgl-debug",
     "program", "shaders", "animation", "html_controller", "scene_node",
     "models/triangle", "models/cube", "models/band"],
-        (function(vbo, $, WebGLDebugUtils,
+        (function($, glmatrix, WebGLDebugUtils,
                 Program, shaders, Animation, HtmlController, SceneNode,
                 Triangle, Cube, Band) {
 
             "use strict";
-            var Robot = function(gl) {
+            /*
+             *  This function asks the HTML Canvas element to create
+             *  a context object for WebGL rendering.
+             *
+             *  It also creates a wrapper around it for debugging 
+             *  purposes, using webgl-debug.js
+             *
+             */
+
+
+
+
+
+            // a simple scene is an object with a few objects and a draw() method
+            var Robot = function(gl, programs) {
+
+
+
+                // create WebGL program using constant red color
+                var prog_red = programs.red2;
+                var prog_blue = programs.blue;
+                // create WebGL program using per-vertex-color
+                var prog_vertexColor = programs.vertexColor;
+                // please register all programs in this list
+
 
                 // create some objects to be drawn
                 var cube = new Cube(gl);
@@ -112,45 +125,45 @@ define(["vbo", "jquery", "webgl-debug",
                 }
                 ;
                 // skeleton for the torso - TODO connect shoulders and neck HERE
-                var torso = new SceneNode("torso");
+                this.torso = new SceneNode("torso");
                 // skin for the torso: a cube...
                 {
-                    var torsoSkin = new SceneNode("torso skin", [cube], "vertexColor");
-                    mat4.translate(torsoSkin.transformation, torsoTranslate);
-                    mat4.scale(torsoSkin.transformation, torsoSize);
-                    mat4.rotate(torsoSkin.transformation, eval(torsoRotation.degree), eval(torsoRotation.axis));
+                    var torsoSkin = new SceneNode("torso skin", cube, prog_vertexColor);
+                    mat4.translate(torsoSkin.transform(), torsoTranslate);
+                    mat4.scale(torsoSkin.transform(), torsoSize);
+                    mat4.rotate(torsoSkin.transform(), eval(torsoRotation.degree), eval(torsoRotation.axis));
                     // connect skeleton + skin
-                    torso.addObjects([torsoSkin]);
+                    this.torso.add(torsoSkin);
                 }
                 ;
                 // Head skeleton
                 {
                     var headNeck = new SceneNode("Head skeleton");
-                    mat4.translate(headNeck.transformation, headSkeletonTrans);
+                    mat4.translate(headNeck.transform(), headSkeletonTrans);
                     {
-                        var faceSkin = new SceneNode("Face skin", [cube], "vertexColor");
-                        mat4.translate(faceSkin.transformation, faceTranslate);
-                        mat4.scale(faceSkin.transformation, faceSize);
-                        mat4.rotate(faceSkin.transformation, eval(faceRotation.degree), eval(faceRotation.axis));
-                        var LEyeSkin = new SceneNode("left eye skin", [triangle], "vertexColor");
-                        mat4.translate(LEyeSkin.transformation, [-0.06, 0.22, 0.16]);
-                        mat4.scale(LEyeSkin.transformation, [0.05, 0.05, 0.05]);
-                        var REyeSkin = new SceneNode("left eye skin", [triangle], "vertexColor");
-                        mat4.translate(REyeSkin.transformation, [0.06, 0.22, 0.16]);
-                        mat4.scale(REyeSkin.transformation, [0.05, 0.05, 0.05]);
-                        var mouthSkin = new SceneNode("mouth skin", [band], "blue");
-                        mat4.translate(mouthSkin.transformation, [0.0, 0.1, 0.15]);
-                        mat4.scale(mouthSkin.transformation, [0.1, 0.05, 0.1]);
-                        var neckSkin = new SceneNode("Neck skin", [band], "red2");
-                        mat4.scale(neckSkin.transformation, neckSize);
-                        headNeck.addObjects([REyeSkin]);
-                        headNeck.addObjects([LEyeSkin]);
-                        headNeck.addObjects([mouthSkin]);
-                        headNeck.addObjects([faceSkin]);
-                        headNeck.addObjects([neckSkin]);
+                        var faceSkin = new SceneNode("Face skin", cube, prog_vertexColor);
+                        mat4.translate(faceSkin.transform(), faceTranslate);
+                        mat4.scale(faceSkin.transform(), faceSize);
+                        mat4.rotate(faceSkin.transform(), eval(faceRotation.degree), eval(faceRotation.axis));
+                        var LEyeSkin = new SceneNode("left eye skin", triangle, prog_vertexColor);
+                        mat4.translate(LEyeSkin.transform(), [-0.06, 0.22, 0.16]);
+                        mat4.scale(LEyeSkin.transform(), [0.05, 0.05, 0.05]);
+                        var REyeSkin = new SceneNode("left eye skin", triangle, prog_vertexColor);
+                        mat4.translate(REyeSkin.transform(), [0.06, 0.22, 0.16]);
+                        mat4.scale(REyeSkin.transform(), [0.05, 0.05, 0.05]);
+                        var mouthSkin = new SceneNode("mouth skin", band, prog_blue);
+                        mat4.translate(mouthSkin.transform(), [0.0, 0.1, 0.15]);
+                        mat4.scale(mouthSkin.transform(), [0.1, 0.05, 0.1]);
+                        var neckSkin = new SceneNode("Neck skin", band, prog_red);
+                        mat4.scale(neckSkin.transform(), neckSize);
+                        headNeck.add(REyeSkin);
+                        headNeck.add(LEyeSkin);
+                        headNeck.add(mouthSkin);
+                        headNeck.add(faceSkin);
+                        headNeck.add(neckSkin);
                     }
                     ;
-                    torso.addObjects([headNeck]);
+                    this.torso.add(headNeck);
                 }
                 ;
                 /**
@@ -158,66 +171,66 @@ define(["vbo", "jquery", "webgl-debug",
                  */
                 {
                     var leftArm = new SceneNode("Left arm");
-                    mat4.translate(leftArm.transformation, leftArmSkeletonTrans);
+                    mat4.translate(leftArm.transform(), leftArmSkeletonTrans);
                     // left upperarm skeleton
                     {
 
                         var leftUpperarm = new SceneNode("left upperarm skeleton");
-                        //mat4.translate(leftUpperarm.transformation, [0,0,0]);
+                        //mat4.translate(leftUpperarm.transform(), [0,0,0]);
 
                         {
-                            var LShoulderJointSkin = new SceneNode("left shoulder joint skin", [band], "blue");
-                            mat4.scale(LShoulderJointSkin.transformation, leftArmSize[0]);
-                            mat4.rotate(LShoulderJointSkin.transformation, eval(leftArmRotate[0].degree), eval(leftArmRotate[0].axis));
-                            var LUpperarmSkin = new SceneNode("left upperarm skin", [cube], vertexColor);
-                            mat4.translate(LUpperarmSkin.transformation, leftArmTranslate[1]);
-                            mat4.scale(LUpperarmSkin.transformation, leftArmSize[1]);
-                            mat4.rotate(LUpperarmSkin.transformation, eval(leftArmRotate[1].degree), eval(leftArmRotate[1].axis));
-                            leftUpperarm.addObjects([LShoulderJointSkin]);
-                            leftUpperarm.addObjects([LUpperarmSkin]);
+                            var LShoulderJointSkin = new SceneNode("left shoulder joint skin", band, prog_blue);
+                            mat4.scale(LShoulderJointSkin.transform(), leftArmSize[0]);
+                            mat4.rotate(LShoulderJointSkin.transform(), eval(leftArmRotate[0].degree), eval(leftArmRotate[0].axis));
+                            var LUpperarmSkin = new SceneNode("left upperarm skin", [cube], prog_vertexColor);
+                            mat4.translate(LUpperarmSkin.transform(), leftArmTranslate[1]);
+                            mat4.scale(LUpperarmSkin.transform(), leftArmSize[1]);
+                            mat4.rotate(LUpperarmSkin.transform(), eval(leftArmRotate[1].degree), eval(leftArmRotate[1].axis));
+                            leftUpperarm.add(LShoulderJointSkin);
+                            leftUpperarm.add(LUpperarmSkin);
                         }
                         ;
-                        leftArm.addObjects([leftUpperarm]);
+                        leftArm.add(leftUpperarm);
                     }
                     ;
                     // --left forearm skeleton 
                     {
                         var leftForearm = new SceneNode("left ellbow skeleton");
-                        mat4.translate(leftForearm.transformation, leftArmTranslate[2]);
+                        mat4.translate(leftForearm.transform(), leftArmTranslate[2]);
                         {
-                            var LEllbowSkin = new SceneNode("left ellbow joint skin", [band], "blue");
-                            mat4.scale(LEllbowSkin.transformation, leftArmSize[2]);
-                            mat4.rotate(LEllbowSkin.transformation, eval(leftArmRotate[2].degree), eval(leftArmRotate[2].axis));
-                            var LForearmSkin = new SceneNode("left forearm skin", [cube], vertexColor);
-                            mat4.translate(LForearmSkin.transformation, leftArmTranslate[3]);
-                            mat4.scale(LForearmSkin.transformation, leftArmSize[3]);
-                            mat4.rotate(LForearmSkin.transformation, eval(leftArmRotate[3].degree), eval(leftArmRotate[3].axis));
-                            leftForearm.addObjects([LEllbowSkin]);
-                            leftForearm.addObjects([LForearmSkin]);
+                            var LEllbowSkin = new SceneNode("left ellbow joint skin", band, prog_blue);
+                            mat4.scale(LEllbowSkin.transform(), leftArmSize[2]);
+                            mat4.rotate(LEllbowSkin.transform(), eval(leftArmRotate[2].degree), eval(leftArmRotate[2].axis));
+                            var LForearmSkin = new SceneNode("left forearm skin", cube, prog_vertexColor);
+                            mat4.translate(LForearmSkin.transform(), leftArmTranslate[3]);
+                            mat4.scale(LForearmSkin.transform(), leftArmSize[3]);
+                            mat4.rotate(LForearmSkin.transform(), eval(leftArmRotate[3].degree), eval(leftArmRotate[3].axis));
+                            leftForearm.add(LEllbowSkin);
+                            leftForearm.add(LForearmSkin);
                         }
                         ;
                         // left hand Skeleton
                         {
                             var leftHand = new SceneNode("Left hand skeleton");
-                            mat4.translate(leftHand.transformation, leftHandTranslate);
+                            mat4.translate(leftHand.transform(), leftHandTranslate);
                             {
-                                var LWristSkin = new SceneNode("Left wrist skin", [band], "red2");
-                                mat4.scale(LWristSkin.transformation, leftArmSize[4]);
-                                mat4.rotate(LWristSkin.transformation, eval(leftArmRotate[4].degree), eval(leftArmRotate[4].axis));
-                                var LHandSkin = new SceneNode("Left hand skin", [triangle], vertexColor);
-                                mat4.translate(LHandSkin.transformation, leftArmTranslate[5]);
-                                mat4.scale(LHandSkin.transformation, leftArmSize[5]);
-                                leftHand.addObjects([LWristSkin]);
-                                leftHand.addObjects([LHandSkin]);
+                                var LWristSkin = new SceneNode("Left wrist skin", band, prog_red);
+                                mat4.scale(LWristSkin.transform(), leftArmSize[4]);
+                                mat4.rotate(LWristSkin.transform(), eval(leftArmRotate[4].degree), eval(leftArmRotate[4].axis));
+                                var LHandSkin = new SceneNode("Left hand skin", triangle, prog_vertexColor);
+                                mat4.translate(LHandSkin.transform(), leftArmTranslate[5]);
+                                mat4.scale(LHandSkin.transform(), leftArmSize[5]);
+                                leftHand.add(LWristSkin);
+                                leftHand.add(LHandSkin);
                             }
                             ;
-                            leftForearm.addObjects([leftHand]);
+                            leftForearm.add(leftHand);
                         }
                         ;
-                        leftArm.addObjects([leftForearm]);
+                        leftArm.add(leftForearm);
                     }
                     ;
-                    torso.addObjects([leftArm]);
+                    this.torso.add(leftArm);
                 }
                 ;
                 /**
@@ -225,74 +238,72 @@ define(["vbo", "jquery", "webgl-debug",
                  */
                 {
                     var rightArm = new SceneNode("right arm");
-                    mat4.translate(rightArm.transformation, rightArmSkeletonTrans);
+                    mat4.translate(rightArm.transform(), rightArmSkeletonTrans);
                     // right upperarm skeleton
                     {
                         var rightUpperarm = new SceneNode("right upperarm skeleton");
                         {
-                            var RShoulderJointSkin = new SceneNode("right shoulder joint skin", [band], "blue");
-                            mat4.scale(RShoulderJointSkin.transformation, rightArmSize[0]);
-                            mat4.rotate(RShoulderJointSkin.transformation, eval(rightArmRotate[0].degree), eval(rightArmRotate[0].axis));
-                            var RUpperarmSkin = new SceneNode("right upperarm skin", [cube], vertexColor);
-                            mat4.translate(RUpperarmSkin.transformation, rightArmTranslate[1]);
-                            mat4.scale(RUpperarmSkin.transformation, rightArmSize[1]);
-                            mat4.rotate(RUpperarmSkin.transformation, eval(rightArmRotate[1].degree), eval(rightArmRotate[1].axis));
-                            rightUpperarm.addObjects([RShoulderJointSkin]);
-                            rightUpperarm.addObjects([RUpperarmSkin]);
+                            var RShoulderJointSkin = new SceneNode("right shoulder joint skin", band, prog_blue);
+                            mat4.scale(RShoulderJointSkin.transform(), rightArmSize[0]);
+                            mat4.rotate(RShoulderJointSkin.transform(), eval(rightArmRotate[0].degree), eval(rightArmRotate[0].axis));
+                            var RUpperarmSkin = new SceneNode("right upperarm skin", cube, prog_vertexColor);
+                            mat4.translate(RUpperarmSkin.transform(), rightArmTranslate[1]);
+                            mat4.scale(RUpperarmSkin.transform(), rightArmSize[1]);
+                            mat4.rotate(RUpperarmSkin.transform(), eval(rightArmRotate[1].degree), eval(rightArmRotate[1].axis));
+                            rightUpperarm.add(RShoulderJointSkin);
+                            rightUpperarm.add(RUpperarmSkin);
                         }
                         ;
-                        rightArm.addObjects([rightUpperarm]);
+                        rightArm.add(rightUpperarm);
                     }
                     ;
                     // right forearm skeleton
                     {
                         var rightForearm = new SceneNode("right ellbow skeleton");
-                        mat4.translate(rightForearm.transformation, rightArmTranslate[2]);
+                        mat4.translate(rightForearm.transform(), rightArmTranslate[2]);
                         {
-                            var REllbowSkin = new SceneNode("right ellbow joint skin", [band], "blue");
-                            mat4.scale(REllbowSkin.transformation, rightArmSize[2]);
-                            mat4.rotate(REllbowSkin.transformation, eval(rightArmRotate[2].degree), eval(rightArmRotate[2].axis));
-                            var RForearmSkin = new SceneNode("right forearm skin", [cube], vertexColor);
-                            mat4.translate(RForearmSkin.transformation, rightArmTranslate[3]);
-                            mat4.scale(RForearmSkin.transformation, rightArmSize[3]);
-                            mat4.rotate(RForearmSkin.transformation, eval(rightArmRotate[3].degree), eval(rightArmRotate[3].axis));
-                            rightForearm.addObjects([REllbowSkin]);
-                            rightForearm.addObjects([RForearmSkin]);
+                            var REllbowSkin = new SceneNode("right ellbow joint skin", band, prog_blue);
+                            mat4.scale(REllbowSkin.transform(), rightArmSize[2]);
+                            mat4.rotate(REllbowSkin.transform(), eval(rightArmRotate[2].degree), eval(rightArmRotate[2].axis));
+                            var RForearmSkin = new SceneNode("right forearm skin", [cube], prog_vertexColor);
+                            mat4.translate(RForearmSkin.transform(), rightArmTranslate[3]);
+                            mat4.scale(RForearmSkin.transform(), rightArmSize[3]);
+                            mat4.rotate(RForearmSkin.transform(), eval(rightArmRotate[3].degree), eval(rightArmRotate[3].axis));
+                            rightForearm.add(REllbowSkin);
+                            rightForearm.add(RForearmSkin);
                         }
                         ;
                         // right hand Skeleton
                         {
                             var rightHand = new SceneNode("right hand skeleton");
-                            mat4.translate(rightHand.transformation, rightHandTranslate);
+                            mat4.translate(rightHand.transform(), rightHandTranslate);
                             {
-                                var RWristSkin = new SceneNode("right wrist skin", [band], "red2");
-                                mat4.scale(RWristSkin.transformation, rightArmSize[4]);
-                                mat4.rotate(RWristSkin.transformation, eval(rightArmRotate[4].degree), eval(rightArmRotate[4].axis));
-                                var RHandSkin = new SceneNode("right hand skin", [triangle], vertexColor);
-                                mat4.translate(RHandSkin.transformation, rightArmTranslate[5]);
-                                mat4.scale(RHandSkin.transformation, rightArmSize[5]);
-                                rightHand.addObjects([RWristSkin]);
-                                rightHand.addObjects([RHandSkin]);
+                                var RWristSkin = new SceneNode("right wrist skin", band, prog_red);
+                                mat4.scale(RWristSkin.transform(), rightArmSize[4]);
+                                mat4.rotate(RWristSkin.transform(), eval(rightArmRotate[4].degree), eval(rightArmRotate[4].axis));
+                                var RHandSkin = new SceneNode("right hand skin", triangle, prog_vertexColor);
+                                mat4.translate(RHandSkin.transform(), rightArmTranslate[5]);
+                                mat4.scale(RHandSkin.transform(), rightArmSize[5]);
+                                rightHand.add(RWristSkin);
+                                rightHand.add(RHandSkin);
                             }
                             ;
-                            rightForearm.addObjects([rightHand]);
+                            rightForearm.add(rightHand);
                         }
                         ;
-                        rightArm.addObjects([rightForearm]);
+                        rightArm.add(rightForearm);
                     }
                     ;
-                    torso.addObjects([rightArm]);
+                    this.torso.add(rightArm);
                 }
                 ;
                 // an entire robot
-                var robot1 = new SceneNode("robot1", [torso]);
-                mat4.translate(robot1.transformation, [0, -0.5, 0]);
-                //mat4.rotate(robot1.transformation, Math.PI/3, [0, 1, 0]);
+                var robot1 = new SceneNode("robot1", this.torso);
+                mat4.translate(robot1.transform(), [0, -0.5, 0]);
+                //mat4.rotate(robot1.transform(), Math.PI/3, [0, 1, 0]);
 
                 // the world - this node is needed in the draw() method below!
-                this.world = new SceneNode("world", [robot1], "red2");
-                // for the UI - this will be accessed directly by HtmlController
-                this.drawOptions = {"Perspective": true};
+                this.world = new SceneNode("world", robot1, prog_red);
                 /*
                  *
                  * Method to rotate within a specified joint - called from HtmlController
@@ -306,43 +317,43 @@ define(["vbo", "jquery", "webgl-debug",
                     // manipulate the right matrix, depending on the name of the joint
                     switch (joint) {
                         case "worldY":
-                            mat4.rotate(this.world.transformation, angle, [0, 1, 0]); // Y-axis
+                            mat4.rotate(this.world.transform(), angle, [0, 1, 0]); // Y-axis
                             break;
                         case "worldX":
-                            mat4.rotate(this.world.transformation, angle, [1, 0, 0]); // X-axis
+                            mat4.rotate(this.world.transform(), angle, [1, 0, 0]); // X-axis
                             break;
                         case "headY":
-                            mat4.rotate(headNeck.transformation, angle, [0, 1, 0]); // h-key headNeck-rotation
+                            mat4.rotate(headNeck.transform(), angle, [0, 1, 0]); // h-key headNeck-rotation
                             break;
                         case "leftArm":
-                            mat4.rotate(leftArm.transformation, -angle, [1, 0, 0]); // q-key leftArm-rotation
+                            mat4.rotate(leftArm.transform(), -angle, [1, 0, 0]); // q-key leftArm-rotation
                             break;
                         case "rightArm":
-                            mat4.rotate(rightArm.transformation, -angle, [1, 0, 0]); // w-key rightArm-rotation
+                            mat4.rotate(rightArm.transform(), -angle, [1, 0, 0]); // w-key rightArm-rotation
                             break;
                         case "leftForearm":
-                            mat4.rotate(leftForearm.transformation, -angle, [1, 0, 0]); // e-key leftForearm-rotation
+                            mat4.rotate(leftForearm.transform(), -angle, [1, 0, 0]); // e-key leftForearm-rotation
                             break;
                         case "rightForearm":
-                            mat4.rotate(rightForearm.transformation, -angle, [1, 0, 0]); // r-key rightForearm-rotation
+                            mat4.rotate(rightForearm.transform(), -angle, [1, 0, 0]); // r-key rightForearm-rotation
                             break;
                             //case "leftWristX": 
-                            //    mat4.rotate(leftHand.transformation, angle, [0,1,0]); // s-key leftHand-rotation
+                            //    mat4.rotate(leftHand.transform(), angle, [0,1,0]); // s-key leftHand-rotation
                             //    break;
                             //case "rightWristX": 
-                            //    mat4.rotate(rightHand.transformation, -angle, [0,1,0]); // d-key rightHand-rotation
+                            //    mat4.rotate(rightHand.transform(), -angle, [0,1,0]); // d-key rightHand-rotation
                             //    break;
                         case "leftHand":
-                            mat4.rotate(leftForearm.transformation, angle, [0, 0, 1]);
+                            mat4.rotate(leftForearm.transform(), angle, [0, 0, 1]);
                             break;
                         case "rightHand":
-                            mat4.rotate(rightForearm.transformation, -angle, [0, 0, 1]);
+                            mat4.rotate(rightForearm.transform(), -angle, [0, 0, 1]);
                             break;
                         case "leftHandX":
-                            mat4.rotate(LHandSkin.transformation, angle, [0, 1, 0]); // v-key LHandSkin-rotation
+                            mat4.rotate(LHandSkin.transform(), angle, [0, 1, 0]); // v-key LHandSkin-rotation
                             break;
                         case "rightHandX":
-                            mat4.rotate(RHandSkin.transformation, -angle, [0, 1, 0]); // b-key RHandSkin-rotation
+                            mat4.rotate(RHandSkin.transform(), -angle, [0, 1, 0]); // b-key RHandSkin-rotation
                             break;
                         default:
                             window.console.log("joint " + joint + " not implemented:");
@@ -353,95 +364,96 @@ define(["vbo", "jquery", "webgl-debug",
                 }; // rotateJoint()
 
             }; // MyRobotScene constructor
-            Robot.prototype.draw = function(gl) {
-              
+
+            // the scene's draw method draws whatever the scene wants to draw
+            MyRobotScene.prototype.draw = function(gl, program, transformation) {
+
+
                 // initial camera / initial model-view matrix
                 var modelView = mat4.lookAt([0, 0.5, 3], [0, 0, 0], [0, 1, 0]);
-
-                // start drawing at the world's root node
-                this.world.draw(gl, this.prog_vertexColor, modelView);
-
+                this.world.draw(gl, this.prog_vertexColor, transformation);
             };
-            var scene = new Robot(gl);
-            // head animation
-            var headRight = true;
-            var headLeft = false;
-            var headCounter = 0;
-            // arm animation
-            var armCounter = 0;
-            var forearmCounterX = 0;
-            var forearmCounterZ = 0;
-            var armUp = true;
-            var armDown = false;
-            var armUpDown = 0;
-            // create an animation: rotate some joints
-            var animation = new Animation((function(t, deltaT) {
-
-                this.customSpeed = this.customSpeed || 1;
-                // speed  times deltaT
-                var speed = deltaT / 1000 * this.customSpeed;
-                // rotate around Y with relative speed 3
-                //scene.rotateJoint("worldY", 3*speed);
-
-                // head animation
-                if (headRight == true && headLeft == false) {
-                    scene.rotateJoint("headY", 2);
-                    headCounter++;
-                    if (headCounter == 20) {
-                        headRight = false;
-                        headLeft = true;
-                    }
-                }
-                ;
-                if (headRight == false && headLeft == true) {
-                    scene.rotateJoint("headY", -2);
-                    headCounter--;
-                    if (headCounter == -20) {
-                        headRight = true;
-                        headLeft = false;
-                    }
-                }
-                ;
-                // arm animation
-                if (armCounter < 25) {
-                    scene.rotateJoint("leftArm", 2);
-                    scene.rotateJoint("rightArm", 2)
-                    armCounter++;
-                }
-                ;
-                if (forearmCounterX < 20) {
-                    scene.rotateJoint("leftForearm", 2);
-                    scene.rotateJoint("rightForearm", 2);
-                    forearmCounterX++;
-                } else {
-                    scene.rotateJoint("leftHandX", 2);
-                    if (forearmCounterZ < 15) {
-                        scene.rotateJoint("leftHand", 2);
-                        scene.rotateJoint("rightHand", 2);
-                        forearmCounterZ++;
-                    } else {
-                        if (armUp == true && armDown == false) {
-                            scene.rotateJoint("leftArm", 3 / 2 * speed);
-                            scene.rotateJoint("rightArm", 3 / 2 * speed);
-                            armUpDown++;
-                            if (armUpDown == 5) {
-                                armUp = false;
-                                armDown = true;
-                            }
-                        }
-                        if (armUp == false && armDown == true) {
-                            scene.rotateJoint("leftArm", -3 / 2 * speed);
-                            scene.rotateJoint("rightArm", -3 / 2 * speed);
-                            armUpDown--;
-                            if (armUpDown == -2) {
-                                armUp = true;
-                                armDown = false;
-                            }
-                        }
-                    }
-                }
-                ;
-            };
-                    return Cube;
+            /*           // create scene and start drawing
+             var scene = new MyRobotScene(gl);
+             scene.draw();
+             // head animation
+             var headRight = true;
+             var headLeft = false;
+             var headCounter = 0;
+             // arm animation
+             var armCounter = 0;
+             var forearmCounterX = 0;
+             var forearmCounterZ = 0;
+             var armUp = true;
+             var armDown = false;
+             var armUpDown = 0;
+             // create an animation: rotate some joints
+             var animation = new Animation((function(t, deltaT) {
+             
+             this.customSpeed = this.customSpeed || 1;
+             // speed  times deltaT
+             var speed = deltaT / 1000 * this.customSpeed;
+             // rotate around Y with relative speed 3
+             //scene.rotateJoint("worldY", 3*speed);
+             
+             // head animation
+             if (headRight == true && headLeft == false) {
+             scene.rotateJoint("headY", 2);
+             headCounter++;
+             if (headCounter == 20) {
+             headRight = false;
+             headLeft = true;
+             }
+             }
+             ;
+             if (headRight == false && headLeft == true) {
+             scene.rotateJoint("headY", - 2);
+             headCounter--;
+             if (headCounter == - 20) {
+             headRight = true;
+             headLeft = false;
+             }
+             }
+             ;
+             // arm animation
+             if (armCounter < 25) {
+             scene.rotateJoint("leftArm", 2);
+             scene.rotateJoint("rightArm", 2)
+             armCounter++;
+             }
+             ;
+             if (forearmCounterX < 20) {
+             scene.rotateJoint("leftForearm", 2);
+             scene.rotateJoint("rightForearm", 2);
+             forearmCounterX++;
+             } else {
+             scene.rotateJoint("leftHandX", 2);
+             if (forearmCounterZ < 15) {
+             scene.rotateJoint("leftHand", 2);
+             scene.rotateJoint("rightHand", 2);
+             forearmCounterZ++;
+             } else {
+             if (armUp == true && armDown == false) {
+             scene.rotateJoint("leftArm", 3 / 2 * speed);
+             scene.rotateJoint("rightArm", 3 / 2 * speed);
+             armUpDown++;
+             if (armUpDown == 5) {
+             armUp = false;
+             armDown = true;
+             }
+             }
+             if (armUp == false && armDown == true) {
+             scene.rotateJoint("leftArm", - 3 / 2 * speed);
+             scene.rotateJoint("rightArm", - 3 / 2 * speed);
+             armUpDown--;
+             if (armUpDown == - 2) {
+             armUp = true;
+             armDown = false;
+             }
+             }
+             }
+             }
+             ;*/
+            // redraw
+            return Robot;
         }));
-

@@ -7,9 +7,9 @@
 
 
 /* requireJS module definition */
-define(["gl-matrix", "program", "shaders", "models/band", "models/triangle", "models/cube", "models/robot",
+define(["gl-matrix", "program", "shaders", "models/band", "models/triangle", "models/cube"/*, "models/robot"*/,"models/robot_Test",
     "models/parametric"],
-        (function(glmatrix, Program, shaders, Band, Triangle, Cube, Robot, ParametricSurface) {
+        (function(glmatrix, Program, shaders, Band, Triangle, Cube/*, Robot*/,RobotTest, ParametricSurface) {
 
             "use strict";
 
@@ -92,7 +92,8 @@ define(["gl-matrix", "program", "shaders", "models/band", "models/triangle", "mo
                 this.band = new Band(gl, {height: 0.4, drawStyle: "points"});
                 this.bandWireframe = new Band(gl, {height: 0.4, asWireframe: true});
                 this.bandFilled = new Band(gl, {height: 0.4, filled: true});
-               // this.robot = new Robot(gl);
+              //  this.robot = new Robot(gl,this.programs);
+                this.robotTest = new RobotTest(gl,this.programs);
 
 
                 // initial position of the camera
@@ -107,7 +108,7 @@ define(["gl-matrix", "program", "shaders", "models/band", "models/triangle", "mo
                 this.drawOptions = {"Perspective Projection": false,
                     "Show Triangle": false,
                     "Show Cube": false,
-                    "Show Band": true,
+                    "Show Band": false,
                     "Solid Band": false,
                     "Wireframe Band": false,
                     "Show Ellipsoid": false,
@@ -115,7 +116,9 @@ define(["gl-matrix", "program", "shaders", "models/band", "models/triangle", "mo
                     "Wire Ellipsoid": false,
                     "Show TorusSurface": false,
                     "Show HyperboloidSurFace": false,
-                    "Show Robot": false
+                    "Show Robot": false,
+                    "Show RobotTest": true
+                    
                 }
                 ;
             };
@@ -139,7 +142,6 @@ define(["gl-matrix", "program", "shaders", "models/band", "models/triangle", "mo
                     this.programs[p].setUniform("projectionMatrix", "mat4", projection);
                     this.programs[p].setUniform("modelViewMatrix", "mat4", this.transformation);
                 }
-                var modelView = mat4.lookAt([0, 0.5, 3], [0, 0, 0], [0, 1, 0]);
 
                 // clear color and depth buffers
                 gl.clearColor(0.7, 0.7, 0.7, 1.0);
@@ -197,7 +199,10 @@ define(["gl-matrix", "program", "shaders", "models/band", "models/triangle", "mo
                     this.hyperboloidEllipsoid.draw(gl, this.programs.red);
                 }
                 if (this.drawOptions["Show Robot"]) {
-                    this.hyperboloidEllipsoid.draw(gl, this.programs.vertexColor);
+                    this.robot.draw(gl, this.program, this.transformation);
+                }
+                  if (this.drawOptions["Show RobotTest"]) {
+                    this.robotTest.draw(gl, this.program, this.transformation);
                 }
             }
             ;

@@ -113,7 +113,7 @@ define(["gl-matrix", "program"],
     SceneNode.prototype.add = function(object, program) {
 
         if(!object.draw) 
-            throw "addObjects(): specified model has no draw() method.";
+            throw "addObjects():"+this.name+" specified model has no draw() method.";
         if(program && !(program instanceof Program))
             throw "addObjects(): specified program is not of type Program.";
 
