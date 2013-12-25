@@ -19,7 +19,7 @@ define(["scene_node", "models/cube"],
                 var torsoSize = [0.6, 1.0, 0.4];
 
                 var head = new SceneNode("head");
-                mat4.translate(head.transform(), [0, torsoSize[1] / 2+ headSize[1] / 2, 0]);
+                mat4.translate(head.transform(), [0, torsoSize[1] / 2 + headSize[1] / 2, 0]);
                 this.torso = new SceneNode("torso");
                 this.torso.add(head);
 

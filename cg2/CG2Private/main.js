@@ -7,7 +7,7 @@
 
 requirejs.config({
     paths: {
-        // jquery library
+// jquery library
         "jquery": [
             // try content delivery network location first
             'http://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min',
@@ -17,8 +17,6 @@ requirejs.config({
         "gl-matrix": "../lib/gl-matrix-1.3.7",
     }
 });
-
-
 /*
  * The function defined below is the "main" module,
  * it will be called once all prerequisites listed in the
@@ -31,18 +29,15 @@ define(["jquery", "gl-matrix", "webgl-debug", "animation", "scene", "html_contro
         (function($, glmatrix, WebGLDebugUtils, Animation, Scene, HtmlController) {
 
             "use strict";
-
             /*
              * create an animation that rotates the scene around 
              * the Y axis over time. 
              */
             var makeAnimation = function(scene) {
-                
                 // head animation
                 var headRight = true;
                 var headLeft = false;
                 var headCounter = 0;
-
                 // arm animation
                 var armCounter = 0;
                 var forearmCounterX = 0;
@@ -57,16 +52,16 @@ define(["jquery", "gl-matrix", "webgl-debug", "animation", "scene", "html_contro
                     var angle = deltaT / 1000 * animation.customSpeed; // in degrees
 
 
-                    // ask the scene to rotate around Y axis
-                    scene.rotate("worldY", angle);
-                    // rotate around Y with relative angle 3
-                    //scene.rotateJoint("worldY", 3*angle);
+                    // scene.rotate("worldY", angle);
+                    //glory animation
+                   
+                    scene.rotate("glory", 3);
 
                     // head animation
                     if (headRight == true && headLeft == false) {
                         scene.rotate("headY", 2);
                         headCounter++;
-                        if (headCounter == 20) {
+                        if (headCounter == 10) {
                             headRight = false;
                             headLeft = true;
                         }
@@ -75,26 +70,26 @@ define(["jquery", "gl-matrix", "webgl-debug", "animation", "scene", "html_contro
                     if (headRight == false && headLeft == true) {
                         scene.rotate("headY", -2);
                         headCounter--;
-                        if (headCounter == -20) {
+                        if (headCounter == -10) {
                             headRight = true;
                             headLeft = false;
                         }
                     }
                     ;
-
                     // arm animation
-                    if (armCounter < 25) {
+                    if (armCounter < 15) {
                         scene.rotate("leftArm", 2);
-                        scene.rotate("rightArm", 2)
+                        scene.rotate("rightArm", 2);
                         armCounter++;
                     }
                     ;
-                    if (forearmCounterX < 20) {
+                    if (forearmCounterX < 10) {
                         scene.rotate("leftForearm", 2);
                         scene.rotate("rightForearm", 2);
                         forearmCounterX++;
                     } else {
-                        scene.rotate("leftHandX", 2);
+                        scene.rotate("leftHandX", 4);
+                        scene.rotate("rightHandX", 4);
                         if (forearmCounterZ < 15) {
                             scene.rotate("leftHand", 2);
                             scene.rotate("rightHand", 2);
@@ -123,16 +118,12 @@ define(["jquery", "gl-matrix", "webgl-debug", "animation", "scene", "html_contro
                     ;
                     // (re-) draw the scene
                     scene.draw();
-
                 })); // end animation callback
 
                 // set an additional attribute that can be controlled from the outside
                 animation.customSpeed = 20;
-
                 return animation;
-
             };
-
             var makeWebGLContext = function(canvas_name) {
 
                 // get the canvas element to be used for drawing
@@ -142,7 +133,6 @@ define(["jquery", "gl-matrix", "webgl-debug", "animation", "scene", "html_contro
                     return null;
                 }
                 ;
-
                 // get WebGL rendering context for canvas element
                 var options = {alpha: true, depth: true, antialias: true};
                 var gl = canvas.getContext("webgl", options) ||
@@ -151,40 +141,42 @@ define(["jquery", "gl-matrix", "webgl-debug", "animation", "scene", "html_contro
                     throw "could not create WebGL rendering context";
                 }
                 ;
-
                 // create a debugging wrapper of the context object
                 var throwOnGLError = function(err, funcName, args) {
                     throw WebGLDebugUtils.glEnumToString(err) + " was caused by call to: " + funcName;
                 };
                 var gl = WebGLDebugUtils.makeDebugContext(gl, throwOnGLError);
-
                 return gl;
             };
-
             $(document).ready((function() {
-            
-                    // create WebGL context object for the named canvas object
-                    var gl = makeWebGLContext("drawing_area");
 
-                    // create scene, create animation, and draw once
-                    var scene = new Scene(gl);
-                    var animation = makeAnimation(scene);
-                    scene.draw();
-
-                    // mapping from character pressed on the keyboard to 
-                    // rotation axis and angle
-                    var keyMap = {
-                        'x': {axis: "worldX", angle: 5.0},
-                        'X': {axis: "worldX", angle: -5.0},
-                        'y': {axis: "worldY", angle: 5.0},
-                        'Y': {axis: "worldY", angle: -5.0}
-                    };
-
-                    // create HtmlController that takes care of all interaction
-                    // of HTML elements with the scene and the animation
-                    var controller = new HtmlController(scene, animation, keyMap);
-
-          
+                // create WebGL context object for the named canvas object
+                var gl = makeWebGLContext("drawing_area");
+                // create scene, create animation, and draw once
+                var scene = new Scene(gl);
+                var animation = makeAnimation(scene);
+                scene.draw();
+                // mapping from character pressed on the keyboard to 
+                // rotation axis and angle
+                var keyMap = {
+                    'x': {axis: "worldX", angle: 5.0},
+                    'X': {axis: "worldX", angle: -5.0},
+                    'y': {axis: "worldY", angle: 5.0},
+                    'Y': {axis: "worldY", angle: -5.0},
+                    'a': {axis: "headY", angle: 5.0},
+                    'A': {axis: "headY", angle: -5.0},
+                    's': {axis: "leftArm", angle: 5.0},
+                    'S': {axis: "leftArm", angle: -5.0},
+                    'd': {axis: "rightArm", angle: 5.0},
+                    'D': {axis: "rightArm", angle: -5.0},
+                    'c': {axis: "leftForearm", angle: 5.0},
+                    'C': {axis: "leftForearm", angle: -5.0},
+                    'q': {axis: "glory", angle: 5.0},
+                    'Q': {axis: "glory", angle: -5.0}
+                };
+                // create HtmlController that takes care of all interaction
+                // of HTML elements with the scene and the animation
+                var controller = new HtmlController(scene, animation, keyMap);
             })); // $(document).ready()
 
 

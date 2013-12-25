@@ -108,7 +108,7 @@ define(["gl-matrix", "program", "shaders", "models/band", "models/triangle", "mo
                 this.drawOptions = {"Perspective Projection": false,
                     "Show Triangle": false,
                     "Show Cube": false,
-                    "Show Band": true,
+                    "Show Band": false,
                     "Solid Band": false,
                     "Wireframe Band": false,
                     "Show Ellipsoid": false,
@@ -116,7 +116,7 @@ define(["gl-matrix", "program", "shaders", "models/band", "models/triangle", "mo
                     "Wire Ellipsoid": false,
                     "Show TorusSurface": false,
                     "Show HyperboloidSurFace": false,
-                    "Show Robot": false,
+                    "Show Robot": true,
                     "Show RobotTest": false
 
                 }
@@ -225,35 +225,41 @@ define(["gl-matrix", "program", "shaders", "models/band", "models/triangle", "mo
                         mat4.rotate(this.transformation, angle, [1, 0, 0]);
                         break;
                     case "headY":
-                        mat4.rotate(this.transformation, angle, [0, 1, 0]); // h-key headNeck-rotation
+                        mat4.rotate(this.robot.headNeck.transform(), angle, [0, 1, 0]); // h-key headNeck-rotation
                         break;
                     case "leftArm":
-                        mat4.rotate(this.transformation, -angle, [1, 0, 0]); // q-key leftArm-rotation
+                        mat4.rotate(this.robot.leftArm.transform(), -angle, [1, 0, 0]); // q-key leftArm-rotation
                         break;
                     case "rightArm":
-                        mat4.rotate(this.transformation, -angle, [1, 0, 0]); // w-key rightArm-rotation
+                        mat4.rotate(this.robot.rightArm.transform(), -angle, [1, 0, 0]); // w-key rightArm-rotation
                         break;
                     case "leftForearm":
-                        mat4.rotate(this.transformation, -angle, [1, 0, 0]); // e-key leftForearm-rotation
+                        mat4.rotate(this.robot.leftForearm.transform(), -angle, [1, 0, 0]); // e-key leftForearm-rotation
                         break;
                     case "rightForearm":
-                        mat4.rotate(this.transformation, -angle, [1, 0, 0]); // r-key rightForearm-rotation
+                        mat4.rotate(this.robot.rightForearm.transform(), -angle, [1, 0, 0]); // r-key rightForearm-rotation
                         break;
 
                     case "leftHand":
-                        mat4.rotate(this.transformation, angle, [0, 0, 1]);
+                        mat4.rotate(this.robot.leftForearm.transform(), angle, [0, 0, 1]);
                         break;
                     case "rightHand":
-                        mat4.rotate(this.transformation, -angle, [0, 0, 1]);
+                        mat4.rotate(this.robot.rightForearm.transform(), -angle, [0, 0, 1]);
                         break;
                     case "leftHandX":
-                        mat4.rotate(this.transformation, angle, [0, 1, 0]); // v-key LHandSkin-rotation
+                        mat4.rotate(this.robot.LHandSkin.transform(), angle, [0, 1, 0]); // v-key LHandSkin-rotation
                         break;
                     case "rightHandX":
-                        mat4.rotate(this.transformation, -angle, [0, 1, 0]); // b-key RHandSkin-rotation
+                        mat4.rotate(this.robot.RHandSkin.transform(), -angle, [0, 1, 0]); // b-key RHandSkin-rotation
                         break;
                     default:
                         window.console.log("axis " + rotationAxis + " not implemented.");
+                        break;
+                    case "glory":
+                        mat4.rotate(this.robot.gloryHead.transform(), angle-0.5, [0, 1, 0]); // v-key LHandSkin-rotation
+                        break;
+                    case "glory":
+                        mat4.rotate(this.robot.gloryHead.transform(), -angle, [0, 1, 0]); // b-key RHandSkin-rotation
                         break;
                 }
                 ;
