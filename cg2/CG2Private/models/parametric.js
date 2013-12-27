@@ -41,11 +41,7 @@ define(["vbo"],
                 this.filled = config.filled || false;
 
 
-                // arrays for the buffer obects
 
-                /*              var triangles = new Uint16Array(numPatches * 6);
-                 var lines = new Uint16Array(numPatches * 4);
-                 */
                 window.console.log("Creating a Ellipse with uSegments:" + uSegments + ", vSegments: " + vSegments + ", uMin: "
                         + uMin + ", drawstyle: " + this.drawstyle + ", asWireframe: " + this.asWireframe + ", filled: " + this.filled + ", uMax: " + uMax + ", vMin: " + vMin + ", vMax:" + vMax);
                 //create u and v
@@ -58,70 +54,49 @@ define(["vbo"],
                         var u = uMin + i * (uMax - uMin) / uSegments;
                         var v = vMin + j * (vMax - vMin) / vSegments;
 
-
-
                         // calculate the vertex attributes and push it in the array
                         var position = posFunc(u, v);
                         coords.push(position[0], position[1], position[2]);
-                        //  var vindex = i * (vSegments + 1) + j;
 
-                        /*   // index inside the 
-                         var iindex = i * vSegments + j;
-                         
-                         // indices for drawing two triangles per patch
-                         if (i < uSegments && j < vSegments) {
-                         var ii = iindex * 6;
-                         triangles[ii++] = vindex;
-                         triangles[ii++] = vindex + (vSegments + 1);
-                         triangles[ii++] = vindex + (vSegments + 1) + 1;
-                         triangles[ii++] = vindex + (vSegments + 1) + 1;
-                         triangles[ii++] = vindex + 1;
-                         triangles[ii++] = vindex;
-                         }
-                         ;
-                         // indices for drawing two lines per patch
-                         if (i < uSegments && j < vSegments) {
-                         var ii = iindex * 4;
-                         lines[ii++] = vindex;
-                         lines[ii++] = vindex + (vSegments + 1);
-                         lines[ii++] = vindex;
-                         lines[ii++] = vindex + 1;
-                         }
-                         ;*/
                     }
                 }
+
+                // indices for filled band
+                var bIndex = [];
+
+                // indices for wireframe
+                var separator = [];
+
+                var rightSide = (vSegments + 1);
+                var realValue = 0;
+                for (var j = 0; j < uSegments * rightSide; j += rightSide) {
+                    for (var i = 0; i < vSegments; i++) {
+                        realValue = j + i;
+                        separator.push(realValue, realValue + 1);
+                        separator.push(realValue, realValue + rightSide);
+                        separator.push(realValue + 1, realValue + 1 + rightSide);
+                        bIndex.push(realValue, realValue + 1, realValue + rightSide, realValue + rightSide, realValue + 1, realValue + rightSide + 1);
+
+                    }
+                    ;
+                }
+                ;
+
+                // Filled - create vertex buffer object (VBO) for the indices
+                this.bIndexBuffer = new vbo.Indices(gl, {"indices": bIndex});
+
+                // Wire - create vertex buffer object (VBO) for the indices
+                this.separatorBuffer = new vbo.Indices(gl, {"indices": separator});
+
                 // create vertex buffer object (VBO) for the coordinates
                 this.coordsBuffer = new vbo.Attribute(gl, {"numComponents": 3,
                     "dataType": gl.FLOAT,
                     "data": coords
                 });
-                // indices for filled band
-                /*  var bIndex = [];
-                 for (var i = 0; i < segments * 2; i += 2) {
-                 bIndex.push(i, i + 1, i + 2, i + 2, i + 1, i + 3); //CCW
-                 
-                 }
-                 ;
-                 // indices for wireframe
-                 var separator = [];
-                 for (var i = 0; i < segments * 2; i += 2) {
-                 separator.push(i, i + 1);
-                 separator.push(i, i + 2);
-                 separator.push(i + 1, i + 3);
-                 //    separator.push(i + 2, i + 3);
-                 }
-                 ;*/
 
 
-                /*              // create vertex buffer object (VBO) for the indices
-                 this.bIndexBuffer = new vbo.Indices(gl, {"indices": bIndex});
-                 
-                 // create vertex buffer object (VBO) for the indices
-                 this.separatorBuffer = new vbo.Indices(gl, {"indices": separator});
-                 
-                 this.triangleBuffer = new vbo.Indices(gl, {"indices": triangles});
-                 this.lineBuffer = new vbo.Indices(gl, {"indices": lines});*/
             };
+
             // draw method: activate buffers and issue WebGL draw() method
             ParametricSurface.prototype.draw = function(gl, program) {
 
@@ -134,39 +109,27 @@ define(["vbo"],
                 } else {
                     window.console.log("Ellipse: draw style " + this.drawStyle + " not implemented.");
                 }
-                /*
-                 if (this.asWireframe) {
-                 // bind the attribute buffers
-                 this.coordsBuffer.bind(gl, program, "vertexPosition");
-                 this.separatorBuffer.bind(gl);
-                 
-                 // draw the vertices as points
-                 gl.drawElements(gl.LINES, this.separatorBuffer.numIndices(), gl.UNSIGNED_SHORT, 0);
-                 }
-                 ;
-                 if (this.filled) {
-                 
-                 // bind the attribute buffers
-                 this.coordsBuffer.bind(gl, program, "vertexPosition");
-                 this.bIndexBuffer.bind(gl);
-                 
-                 // draw the vertices as points
-                 gl.drawElements(gl.TRIANGLES, this.bIndexBuffer.numIndices(), gl.UNSIGNED_SHORT, 0);
-                 }
-                 ;*/
-                /*if (this.wireframe) {
-                 // draw wireframe lines
-                 this.lineBuffer.bind(gl);
-                 program.gl.drawElements(gl.LINES, this.lineBuffer.numIndices(), gl.UNSIGNED_SHORT, 0);
-                 } else {
-                 // draw as solid / surface
-                 this.triangleBuffer.bind(gl);
-                 gl.polygonOffset(2.0, 2.0);
-                 gl.enable(gl.POLYGON_OFFSET_FILL);
-                 program.gl.drawElements(gl.TRIANGLES, this.triangleBuffer.numIndices(), gl.UNSIGNED_SHORT, 0);
-                 gl.disable(gl.POLYGON_OFFSET_FILL);
-                 }
-                 ;*/
+
+                if (this.asWireframe) {
+                    // bind the attribute buffers
+                    this.coordsBuffer.bind(gl, program, "vertexPosition");
+                    this.separatorBuffer.bind(gl);
+
+                    // draw the vertices as points
+                    gl.drawElements(gl.LINES, this.separatorBuffer.numIndices(), gl.UNSIGNED_SHORT, 0);
+                }
+                ;
+                if (this.filled) {
+
+                    // bind the attribute buffers
+                    this.coordsBuffer.bind(gl, program, "vertexPosition");
+                    this.bIndexBuffer.bind(gl);
+
+                    // draw the vertices as points
+                    gl.drawElements(gl.TRIANGLES, this.bIndexBuffer.numIndices(), gl.UNSIGNED_SHORT, 0);
+                }
+
+
 
             };
             // this module only returns the Band constructor function    

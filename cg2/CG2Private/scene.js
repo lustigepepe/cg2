@@ -75,17 +75,20 @@ define(["gl-matrix", "program", "shaders", "models/band", "models/triangle", "mo
                     "vSegments": 20
                 };
                 //Objects for class Ellipsoid
-                /*  this.ellipsoid = new ParametricSurface(gl, positionFunc, config);
-                 this.torusEllipsoid = new ParametricSurface(gl, torusFunc, config);
-                 this.hyperboloidEllipsoid = new ParametricSurface(gl, hyperboloidFunc, config);*/
-                /*              this.ellipsoidWirefire = new ParametricSurface(gl, positionFunc, {asWireframe: true});
-                 this.hyperboloidEllipsoidWirefire = new ParametricSurface(gl, hyperboloidFunc, {asWireframe: true});
-                 
-                 this.ellipsoidFilled = new ParametricSurface(gl, positionFunc, {filled: true});
-                 this.hyperboloidEllipsoidFilled = new ParametricSurface(gl, hyperboloidFunc, {filled: true});
-                 
-                 
-                 */
+                this.ellipsoid = new ParametricSurface(gl, positionFunc, config);
+                this.ellipsoidFilled = new ParametricSurface(gl, positionFunc, {filled: true});
+                this.ellipsoidWirefire = new ParametricSurface(gl, positionFunc, {asWireframe: true});
+
+                this.torusEllipsoidFilled = new ParametricSurface(gl, torusFunc, {filled: true});
+                this.torusEllipsoidWireFire = new ParametricSurface(gl, torusFunc, {asWireframe: true});
+                this.torusEllipsoid = new ParametricSurface(gl, torusFunc, config);
+
+                this.hyperboloidEllipsoid = new ParametricSurface(gl, hyperboloidFunc, config);
+                this.hyperboloidEllipsoidFilled = new ParametricSurface(gl, hyperboloidFunc, {filled: true});
+                this.hyperboloidEllipsoidWirefire = new ParametricSurface(gl, hyperboloidFunc, {asWireframe: true});
+
+
+
                 // create some objects to be drawn in this scene
                 this.triangle = new Triangle(gl);
                 this.cube = new Cube(gl);
@@ -110,13 +113,17 @@ define(["gl-matrix", "program", "shaders", "models/band", "models/triangle", "mo
                     "Show Cube": false,
                     "Show Band": false,
                     "Solid Band": false,
-                    "Wireframe Band": false,
+                    "Wireframe Band": true,
                     "Show Ellipsoid": false,
                     "Solid Ellipsoid": false,
                     "Wire Ellipsoid": false,
                     "Show TorusSurface": false,
+                    "Solid TorusSurface": false,
+                    "Wire TorusSurface": false,
                     "Show HyperboloidSurFace": false,
-                    "Show Robot": true,
+                    "Solid HyperboloidSurFace": false,
+                    "Wire HyperboloidSurFace": false,
+                    "Show Robot": false,
                     "Show RobotTest": false
 
                 }
@@ -181,13 +188,13 @@ define(["gl-matrix", "program", "shaders", "models/band", "models/triangle", "mo
                 if (this.drawOptions["Show Ellipsoid"]) {
                     this.ellipsoid.draw(gl, this.programs.red);
                 }
-                ;/*
-                 if (this.drawOptions["Solid Ellipsoid"]) {
-                 this.ellipsoidWirefire.draw(gl, this.programs.black);
-                 }
-                 if (this.drawOptions["Wire Ellipsoid"]) {
-                 this.ellipsoidFilled.draw(gl, this.programs.red);
-                 }*/
+                ;
+                if (this.drawOptions["Wire Ellipsoid"]) {
+                    this.ellipsoidWirefire.draw(gl, this.programs.black);
+                }
+                if (this.drawOptions["Solid Ellipsoid"]) {
+                    this.ellipsoidFilled.draw(gl, this.programs.red2);
+                }
 
                 if (this.drawOptions["Show Ellipsoid"]) {
                     this.ellipsoid.draw(gl, this.programs.red);
@@ -195,8 +202,20 @@ define(["gl-matrix", "program", "shaders", "models/band", "models/triangle", "mo
                 if (this.drawOptions["Show TorusSurface"]) {
                     this.torusEllipsoid.draw(gl, this.programs.red);
                 }
+                if (this.drawOptions["Solid TorusSurface"]) {
+                    this.torusEllipsoidFilled.draw(gl, this.programs.red);
+                }
+                if (this.drawOptions["Wire TorusSurface"]) {
+                    this.torusEllipsoidWireFire.draw(gl, this.programs.black);
+                }
                 if (this.drawOptions["Show HyperboloidSurFace"]) {
                     this.hyperboloidEllipsoid.draw(gl, this.programs.red);
+                }
+                if (this.drawOptions["Solid HyperboloidSurFace"]) {
+                    this.hyperboloidEllipsoidFilled.draw(gl, this.programs.red);
+                }
+                  if (this.drawOptions["Wire HyperboloidSurFace"]) {
+                    this.hyperboloidEllipsoidWirefire.draw(gl, this.programs.black);
                 }
                 if (this.drawOptions["Show Robot"]) {
                     this.robot.draw(gl, this.program, this.transformation);
@@ -256,7 +275,7 @@ define(["gl-matrix", "program", "shaders", "models/band", "models/triangle", "mo
                         window.console.log("axis " + rotationAxis + " not implemented.");
                         break;
                     case "glory":
-                        mat4.rotate(this.robot.gloryHead.transform(), angle-0.5, [0, 1, 0]); // v-key LHandSkin-rotation
+                        mat4.rotate(this.robot.gloryHead.transform(), angle, [0, 1, 0]); // v-key LHandSkin-rotation
                         break;
                     case "glory":
                         mat4.rotate(this.robot.gloryHead.transform(), -angle, [0, 1, 0]); // b-key RHandSkin-rotation

@@ -64,12 +64,6 @@ define(["vbo"],
                 for (var i = 0; i < segments * 2; i += 2) {
 
                     bIndex.push(i, i + 1, i + 2, i + 2, i + 1, i + 3);
-                    /*bIndex.push(i, i + 1);
-                     bIndex.push(i, i + 2);
-                     bIndex.push(i + 1, i + 3);
-                     bIndex.push(i + 2, i + 3);    */
-
-
                 }
                 ;
 
@@ -88,10 +82,10 @@ define(["vbo"],
                     "dataType": gl.FLOAT,
                     "data": coords
                 });
-                // create vertex buffer object (VBO) for the indices
+                // Filled - create vertex buffer object (VBO) for the indices
                 this.bIndexBuffer = new vbo.Indices(gl, {"indices": bIndex});
 
-                // create vertex buffer object (VBO) for the indices
+                // Wireframe - create vertex buffer  object (VBO) for the indices
                 this.separatorBuffer = new vbo.Indices(gl, {"indices": separator});
 
 

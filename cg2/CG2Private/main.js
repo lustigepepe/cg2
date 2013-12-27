@@ -116,9 +116,9 @@ define(["jquery", "gl-matrix", "webgl-debug", "animation", "scene", "html_contro
                         }
                     }
                     ;
-                    // (re-) draw the scene
+                   
                     scene.draw();
-                })); // end animation callback
+                })); 
 
                 // set an additional attribute that can be controlled from the outside
                 animation.customSpeed = 20;
