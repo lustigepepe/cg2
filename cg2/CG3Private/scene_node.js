@@ -2,17 +2,17 @@
  * WebGL core teaching framwork 
  * (C)opyright Hartmut Schirmacher, hschirmacher.beuth-hochschule.de 
  *
- * Module: SceneNode (WS 2013 edition)
+ * Module: SceneNode (WS 2013a3 edition)
  *
  * A SceneNode is a container for a transformation and a list of
- * <drawable object, GPU program>.
+ * pairs <drawable object, Material>.
  *
  * The drawable objects can themselves be SceneNodes. This way 
  * hierarchical modeling is supported.
  *
- * The program and the transformation are optional. However when
- * it comes to a conrete model to be drawn, a actual program must
- * be specified so that the model's draw() method can do its task. 
+ * The Material and the transformation are optional. However when
+ * it comes to a conrete model to be drawn, an actual Material must
+ * be specified so that the model's draw() method can work. 
  * 
  * Methods: see comments above each method header.
  *
@@ -20,8 +20,8 @@
 
 
 /* requireJS module definition */
-define(["gl-matrix", "program"], 
-       (function(dummy, Program) {
+define(["gl-matrix", "material"], 
+       (function(dummy, Material) {
 
     "use strict";
     
@@ -40,9 +40,11 @@ define(["gl-matrix", "program"],
         this.transformation  = mat4.identity();
         
         // list of children. each child is an object sholding a 
-        // drawable object and a GUP program
+        // drawable object and a Material object
         this.children = [];
         
+        // flag to show/hide nodes (including their children)
+        this.visible = true;
     };
     
     /*
@@ -54,12 +56,21 @@ define(["gl-matrix", "program"],
     SceneNode.prototype.transform = function() {
         return this.transformation;
     }
-    
+
+    /*
+     * Method: setVisible(bool) 
+     * Enables/disables rendering of this node and its children
+     *
+     */
+    SceneNode.prototype.setVisible = function(flag) {
+        this.visible = flag;
+    }
+
     /*
      * Method: draw() 
      *
-     * This method takes a model-view matrix and a program, both optional.
-     * If a non-null program is specified, it overrides the programs 
+     * This method takes a model-view matrix and a Material, both optional.
+     * If a non-null Material is specified, it overrides the programs 
      * specified for each individual child object.
      * 
      * It multiplies the provided matrix (or identity) with the node's 
@@ -67,14 +78,17 @@ define(["gl-matrix", "program"],
      * variable "modelViewMatrix" to the resulting matrix, and then 
      * calls draw() of all its children recursively. 
      *
-     * For each child, the method either takes the program provided as
-     * an argument, or if that is undefined, the program provided for 
+     * For each child, the method either takes the Material provided as
+     * an argument, or if that is undefined, the Material provided for 
      * the respective child (see add()).
      * 
      */
-    SceneNode.prototype.draw = function(gl, program, modelViewMatrix) {
+    SceneNode.prototype.draw = function(gl, material, modelViewMatrix) {
     
         // window.console.log("drawing " + this.name);
+
+        if(!this.visible)
+            return;
 
         if(!gl) {
             throw "no WebGL context available in scene node " + this.name;
@@ -87,20 +101,24 @@ define(["gl-matrix", "program"],
         // multiply the local transformation from the right so it will be executed FIRST
         mat4.multiply(newMatrix, this.transformation);  
 
+        // calculate the normal matrix
+        var normalMatrix =  mat4.toInverseMat3(newMatrix);
+        mat3.transpose(normalMatrix,normalMatrix);
+
         // loop over all drawable objects and call their draw() methods
         for(var i in this.children) {
-            var obj  = this.children[i].obj;
-            var prog = program || this.children[i].prog;
+            var obj = this.children[i].obj;
+            var mat = material || this.children[i].mat;
 
-            if(prog) {
-                prog.use();
-                prog.setUniform("modelViewMatrix", "mat4", newMatrix);
+            // before drawing each child, set the transformation matrices
+            if(mat) {
+                mat.setUniform("modelViewMatrix", "mat4", newMatrix);
+                mat.setUniform("normalMatrix", "mat3", normalMatrix);
             }
 
             // call draw() method of the object
-            obj.draw(gl, prog, newMatrix);
+            obj.draw(gl, mat, newMatrix);
         };
-        
     };
     
     /* 
@@ -110,35 +128,17 @@ define(["gl-matrix", "program"],
      * If a program is specified, use that program to draw the specified child. 
      * 
      */
-    SceneNode.prototype.add = function(object, program) {
+    SceneNode.prototype.add = function(object, material) {
 
         if(!object.draw) 
-            throw "addObjects():"+this.name+" specified model has no draw() method.";
-        if(program && !(program instanceof Program))
-            throw "addObjects(): specified program is not of type Program.";
+            throw "addObjects(): specified model has no draw() method.";
+        if(material && !(material instanceof Material))
+            throw "addObjects(): specified material is not of type Material.";
 
-        this.children.push({"obj": object, "prog": program});
-
-        if(object.name) 
-            window.console.log("added " + object.name + " to node " + this.name + ".");
+        this.children.push({"obj": object, "mat": material});
             
     };
-    
-    /*
-     * remove drawable object from the SceneNode, recursively 
-     */
-    SceneNode.prototype.remove = function(object) {
-
-        for(var i in this.drawableObjects) {
-            if(this.children[i].obj == object) {
-                this.children.splice(i,1);
-                return;
-            }
-        }
-        window.console.log("warning: SceneNode.remove(): object " + object + " not found.");
-            
-    };
-    
+        
     // this module only exports the constructor for SceneNode objects
     return SceneNode;
 

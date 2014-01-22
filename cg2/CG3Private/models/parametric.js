@@ -25,13 +25,16 @@ define(["vbo"],
                 // read the configuration parameters
                 posFunc = posFunc || function(u, v) {
                     return [0.5 * Math.sin(u) * Math.cos(v),
-                        0.3 * Math.sin(u) * Math.sin(v),
-                        0.9 * Math.cos(u)];
+                        0.5 * Math.sin(u) * Math.sin(v),
+                        0.5 * Math.cos(u)];
                 }
                 ;
+                var texCoords = function(u, v) {
+                    return [0.5 + u / (Math.PI * 2), v / (Math.PI)];
+                };
                 config = config || {};
-                var uSegments = config.uSegments || 40;
-                var vSegments = config.vSegments || 20;
+                var uSegments = config.uSegments || 70;
+                var vSegments = config.vSegments || 70;
                 var uMin = config.uMin || -Math.PI;
                 var uMax = config.uMax || Math.PI;
                 var vMin = config.vMin || -Math.PI;
@@ -41,12 +44,14 @@ define(["vbo"],
                 this.filled = config.filled || false;
 
 
-
                 window.console.log("Creating a Ellipse with uSegments:" + uSegments + ", vSegments: " + vSegments + ", uMin: "
                         + uMin + ", drawstyle: " + this.drawstyle + ", asWireframe: " + this.asWireframe + ", filled: " + this.filled + ", uMax: " + uMax + ", vMin: " + vMin + ", vMax:" + vMax);
                 //create u and v
                 // generate vertex coordinates and store in an array
                 var coords = [];
+                //      var colors = [];
+                var normals = [];
+                //    var texcoords = [];
                 for (var i = 0; i <= uSegments; i++) {
                     for (var j = 0; j <= vSegments; j++) {
 
@@ -57,7 +62,10 @@ define(["vbo"],
                         // calculate the vertex attributes and push it in the array
                         var position = posFunc(u, v);
                         coords.push(position[0], position[1], position[2]);
-
+                        //   colors.push(1, 0, 0, 1);
+                        normals.push(position[0], position[1], position[2]);
+                        //var tex = texCoords(u, v);
+                        // texcoords.push(tex[0],tex[1]);
                     }
                 }
 
@@ -95,14 +103,40 @@ define(["vbo"],
                 });
 
 
+
+                // create vertex buffer object (VBO) for the colors
+                /*  this.colorBuffer = new vbo.Attribute(gl, {"numComponents": 4,
+                 "dataType": gl.FLOAT,
+                 "data": colors
+                 });*/
+
+                // create vertex buffer object (VBO) for the normal vectors
+                this.normalBuffer = new vbo.Attribute(gl, {"numComponents": 3,
+                    "dataType": gl.FLOAT,
+                    "data": normals
+                });
+
+                // create vertex buffer object (VBO) for the normal vectors
+                /*   this.texcoordsBuffer = new vbo.Attribute(gl, {"numComponents": 2,
+                 "dataType": gl.FLOAT,
+                 "data": texcoords
+                 });*/
+
+
             };
 
             // draw method: activate buffers and issue WebGL draw() method
-            ParametricSurface.prototype.draw = function(gl, program) {
+            ParametricSurface.prototype.draw = function(gl, material) {
+
+                material.apply();
 
                 // bind the attribute buffers
-                program.use();
+                var program = material.getProgram();
                 this.coordsBuffer.bind(gl, program, "vertexPosition");
+                // this.colorBuffer.bind(gl, program, "vertexColor");
+                this.normalBuffer.bind(gl, program, "vertexNormal");
+                //his.texcoordsBuffer.bind(gl, program, "vertexTexCoords");
+                // bind the attribute buffers
                 // draw the vertices as points
                 if (this.drawStyle == "points") {
                     gl.drawArrays(gl.POINTS, 0, this.coordsBuffer.numVertices());
@@ -119,9 +153,14 @@ define(["vbo"],
                     gl.drawElements(gl.LINES, this.separatorBuffer.numIndices(), gl.UNSIGNED_SHORT, 0);
                 }
                 ;
-                if (this.filled) {
+                 if (this.filled) {
+               
+                    // bind the attribute buffers
+                    material.apply();
 
                     // bind the attribute buffers
+                    var program = material.getProgram();
+                    this.normalBuffer.bind(gl, program, "vertexNormal");
                     this.coordsBuffer.bind(gl, program, "vertexPosition");
                     this.bIndexBuffer.bind(gl);
 

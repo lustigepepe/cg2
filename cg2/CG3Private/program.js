@@ -37,7 +37,7 @@ define([],
     var checkCompilationStatus = function(gl, shader, name) {
     
         var compiled = gl.getShaderParameter(shader, gl.COMPILE_STATUS);
-        
+
         if (!compiled) {
             // Something went wrong during compilation; get the error
             var error = gl.getShaderInfoLog(shader);
@@ -45,6 +45,7 @@ define([],
             gl.deleteShader(shader);
             return false;
         };
+        // console.log("shader " + name + ": " + gl.getShaderInfoLog(shader));
         return true;
     };
  
@@ -63,7 +64,6 @@ define([],
          
        
     */ 
-
     var Program = function(gl, vertexShaderSource, fragmentShaderSource) {
 
         // store associated WebGL rendering context
@@ -72,6 +72,9 @@ define([],
         // create a new WebGL program object
         this.glProgram = gl.createProgram();
         
+        if(!vertexShaderSource || !fragmentShaderSource)
+            throw "must specify both vertex shader source and fragment shader source!";
+
         // compile and attach vertex shader
         var vshader = gl.createShader(gl.VERTEX_SHADER);
         gl.shaderSource(vshader, vertexShaderSource);
@@ -92,7 +95,10 @@ define([],
 
         // link the program so it can be used
         gl.linkProgram(this.glProgram);
-
+        var success = gl.getProgramParameter(this.glProgram, gl.LINK_STATUS);
+        if (!success) {
+            throw "program failed to link:" + gl.getProgramInfoLog(this.glProgram);
+        }
     }; 
 
     /* 
@@ -221,7 +227,7 @@ define([],
         };
 
         // does the texture object have an isLoaded() method?
-        if( !texture.isLoaded || !texture.glTexture ) {
+        if( texture===undefined || texture.isLoaded===undefined || texture.glTextureObject===undefined ) {
             throw "setTexture(): not a valid texture wrapper object.";
             return false; 
         };
@@ -235,13 +241,13 @@ define([],
         // is the desired texture unit within the allowed range?
         var max = this.gl.MAX_COMBINED_TEXTURE_IMAGE_UNITS;
         if(textureUnit < 0 || textureUnit >= max) {
-            throw "ERROR: setTexture(): texture unit " + textureUnit + 
+            throw "setTexture(): texture unit " + textureUnit + 
                        " out of range [0 ... " + max-1 + "]";
             return false;
         };
         
         // find location of texture's uniform variable
-        var location = this.gl.getUniformLocation(glProgram, uniformName);
+        var location = this.gl.getUniformLocation(this.glProgram, uniformName);
         if(location === null) {
             window.console.log("uniform sampler " + uniformName + " not used in shader.");
             return;
@@ -259,8 +265,8 @@ define([],
         this.gl.bindTexture(this.gl.TEXTURE_2D, texture.glTextureObject());
       
     }; // setTexture()
-                             
-    // this module only returns the Ring constructor function    
+                            
+    // this module only returns the constructor function    
     return Program;
 
 })); // define
