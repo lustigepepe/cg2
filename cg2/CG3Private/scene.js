@@ -51,8 +51,7 @@ define(["gl-matrix", "program", "scene_node", "shaders", "directional_light", "m
                 this.materials.planet.setUniform("light.direction", "vec3", [-1, 0, 0]);
                 this.materials.planet.setUniform("light.color", "vec3", [1, 1, 1]);
 
-           
-                // TODO load and create required textures
+                // TODO load and create required texturesvec3
 
                 // initial position of the camera
                 this.cameraTransformation = mat4.lookAt([0, 0, 3], [0, 0, 0], [0, 1, 0]);
@@ -116,7 +115,7 @@ define(["gl-matrix", "program", "scene_node", "shaders", "directional_light", "m
                 // automatically generates a corresponding checkbox in the UI.
                 this.drawOptions = {
                     "Show Surface": true,
-                    "Show Grid": true,
+                    "Show Grid": false,
                     "Debug": true
 
                 };
@@ -155,8 +154,8 @@ define(["gl-matrix", "program", "scene_node", "shaders", "directional_light", "m
 
                 if (this.drawOptions["Debug"]) {
                     this.materials.planet.setUniform("debug", "bool", true);
-                }else{
-                     this.materials.planet.setUniform("debug", "bool", false);
+                } else {
+                    this.materials.planet.setUniform("debug", "bool", false);
                 }
                 ;
                 // draw the scene 

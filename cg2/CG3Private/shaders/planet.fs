@@ -32,7 +32,7 @@ struct PhongMaterial {
     float shininess;
 };
 uniform PhongMaterial material;
-
+  
 // Light Source Data for a directional light
 struct LightSource {
 
@@ -60,7 +60,7 @@ uniform bool debug;
 vec3 phong(vec3 pos, vec3 n, vec3 v, LightSource light, PhongMaterial material) {
 
     // ambient part
-    vec3 ambient = material.ambient * ambientLight;
+    vec3 ambient = material.ambient * ambientLight * material.diffuse;
 
     // back face towards viewer (looking at the earth from the inside)?
     float ndotv = dot(n,v);
@@ -83,7 +83,7 @@ vec3 phong(vec3 pos, vec3 n, vec3 v, LightSource light, PhongMaterial material) 
         if (ndotl > -0.045 && ndotl < 0.045)
             return vec3(0,1,0);
     
-     // reflected light direction = perfect reflection direction
+    // reflected light direction = perfect reflection direction
     vec3 r = reflect(l,n);
     
     // angle between reflection dir and viewing dir
@@ -97,9 +97,7 @@ vec3 phong(vec3 pos, vec3 n, vec3 v, LightSource light, PhongMaterial material) 
 }
 
 void main() {
-    //Debug Stripe but not white stripes!
-    vec3 stripe = material.ambient * ambientLight* vec3(1.2,1.2,1.2); 
-
+ 
     // normalize normal after projection
     vec3 normalEC = normalize(ecNormal);
     
@@ -114,14 +112,17 @@ void main() {
     // calculate color using phong illumination
     vec3 color = phong( ecPosition.xyz, normalEC, viewdirEC,
                         light, material );
-    
+
+    vec3 stripe = color * ambientLight;
+    if(debug){
     //the clue it glue
-    gl_FragColor = vec4(color, 1.0);
-    if (mod(texCoords.y, 0.1) >= 0.05)  
-    { 
-        gl_FragColor ;    
-    } else { 
-        gl_FragColor = vec4(stripe,1.0);
-    };     
-        
+        if (mod(texCoords.y, 0.1) >= 0.05)  
+        { 
+           gl_FragColor = vec4(color, 1.0); 
+        } else { 
+           gl_FragColor = vec4(stripe,1.0);
+        };
+    } else {
+         gl_FragColor = vec4(color, 1.0);
+    }
 }
