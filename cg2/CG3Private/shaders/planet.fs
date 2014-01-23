@@ -15,8 +15,8 @@ precision mediump float;
 // position and normal in eye coordinates
 varying vec4  ecPosition;
 varying vec3  ecNormal;
-varying vec2  texCoords;
- 
+varying vec2  texCoords
+; 
 // transformation matrices
 uniform mat4  modelViewMatrix;
 uniform mat4  projectionMatrix;
@@ -58,10 +58,10 @@ uniform bool debug;
  
  */
 vec3 phong(vec3 pos, vec3 n, vec3 v, LightSource light, PhongMaterial material) {
-    
+
     // ambient part
     vec3 ambient = material.ambient * ambientLight;
-    
+
     // back face towards viewer (looking at the earth from the inside)?
     float ndotv = dot(n,v);
     if(ndotv<0.0)
@@ -69,14 +69,19 @@ vec3 phong(vec3 pos, vec3 n, vec3 v, LightSource light, PhongMaterial material) 
     
     // vector from light to current point
     vec3 l = normalize(light.direction);
-    
+      
     // cos of angle between light and surface. 
     float ndotl = dot(n,-l);
     if(ndotl<=0.0) 
-        return ambient; // shadow / facing away from the light source
-    
+       return  ambient; // shadow / facing away from the light source
+   
     // diffuse contribution
     vec3 diffuse = material.diffuse * light.color * ndotl;
+    
+    // sign the greenStripe on horizon
+    if(debug)
+        if (ndotl > -0.045 && ndotl < 0.045)
+            return vec3(0,1,0);
     
      // reflected light direction = perfect reflection direction
     vec3 r = reflect(l,n);
@@ -86,15 +91,15 @@ vec3 phong(vec3 pos, vec3 n, vec3 v, LightSource light, PhongMaterial material) 
     
     // specular contribution
     vec3 specular = material.specular * light.color * pow(rdotv, material.shininess);
-/*if (debug){
-return */
+
     // return sum of all contributions
-    return ambient + diffuse + specular;
-    
+    return ambient + diffuse + specular;;
 }
 
 void main() {
-    
+    //Debug Stripe but not white stripes!
+    vec3 stripe = material.ambient * ambientLight* vec3(1.2,1.2,1.2); 
+
     // normalize normal after projection
     vec3 normalEC = normalize(ecNormal);
     
@@ -109,7 +114,14 @@ void main() {
     // calculate color using phong illumination
     vec3 color = phong( ecPosition.xyz, normalEC, viewdirEC,
                         light, material );
-
-    gl_FragColor = vec4(color, 1.0);
     
+    //the clue it glue
+    gl_FragColor = vec4(color, 1.0);
+    if (mod(texCoords.y, 0.1) >= 0.05)  
+    { 
+        gl_FragColor ;    
+    } else { 
+        gl_FragColor = vec4(stripe,1.0);
+    };     
+        
 }
